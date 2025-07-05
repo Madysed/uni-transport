@@ -3,12 +3,10 @@ package algorithms;
 public class UnionFind {
     private final int[] parent;
     private final int[] rank;
-    private int components;
     
     public UnionFind(int n) {
         parent = new int[n];
         rank = new int[n];
-        components = n;
 
         for (int i = 0; i < n; i++) {
             parent[i] = i; //self parents at start
@@ -38,7 +36,6 @@ public class UnionFind {
             parent[rootY] = rootX;
             rank[rootX]++;
         }
-        components--;
         return true;
     }
 } 
