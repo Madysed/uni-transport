@@ -3,10 +3,6 @@ package models;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a node (university) in the transportation graph.
- * Each node has a name, coordinates, and connections to other nodes via edges.
- */
 public class Node {
     private String name;
     private double x, y;
@@ -15,13 +11,7 @@ public class Node {
     private double distance;
     private Node parent;
     private Color color;
-    
-    /**
-     * Creates a new node with specified name and coordinates.
-     * @param name The name of the university
-     * @param x The x-coordinate for visualization
-     * @param y The y-coordinate for visualization
-     */
+
     public Node(String name, double x, double y) {
         this.name = name;
         this.x = x;
@@ -32,12 +22,7 @@ public class Node {
         this.parent = null;
         this.color = Color.WHITE;
     }
-    
-    /**
-     * Creates a new node with specified name and default coordinates.
-     * Coordinates will be set later by arrangeNodesInCircle method.
-     * @param name The name of the university
-     */
+
     public Node(String name) {
         this(name, 0, 0);
     }

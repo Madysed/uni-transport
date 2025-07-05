@@ -59,8 +59,6 @@ public class Kruskal {
         
         return mstEdges;
     }
-    
-
 
     
     public static double calculateMSTCost(List<Edge> mstEdges) {
