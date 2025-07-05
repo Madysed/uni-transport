@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Main {
     private static List<Node> universities = new ArrayList<>();
-    private static Scanner scanner = new Scanner(System.in);
+    private static final Scanner scanner = new Scanner(System.in);
     private static boolean running = true;
     
     public static void main(String[] args) {
@@ -251,17 +251,17 @@ public class Main {
         // Display adjacency matrix
         System.out.println("\nAdjacency Matrix:");
         System.out.print("     ");
-        for (int i = 0; i < universities.size(); i++) {
-            System.out.printf("%8s", universities.get(i).getName().substring(0, 
-                Math.min(7, universities.get(i).getName().length())));
+        for (Node node : universities) {
+            System.out.printf("%8s", node.getName().substring(0,
+                    Math.min(7, node.getName().length())));
         }
         System.out.println();
         
         for (int i = 0; i < universities.size(); i++) {
             System.out.printf("%8s", universities.get(i).getName().substring(0, 
                 Math.min(7, universities.get(i).getName().length())));
-            for (int j = 0; j < universities.size(); j++) {
-                double weight = getEdgeWeight(universities.get(i), universities.get(j));
+            for (Node university : universities) {
+                double weight = getEdgeWeight(universities.get(i), university);
                 if (weight > 0) {
                     System.out.printf("%8.0f", weight);
                 } else {
@@ -293,8 +293,8 @@ public class Main {
         // Phase 2: Shortest Path
         if (universities.size() >= 2) {
             System.out.println("\n2. Shortest Path (Dijkstra):");
-            Node start = universities.get(0);
-            Node end = universities.get(universities.size() - 1);
+            Node start = universities.getFirst();
+            Node end = universities.getLast();
             
             List<Node> shortestPath = Dijkstra.findShortestPath(universities, start, end);
             if (!shortestPath.isEmpty()) {
@@ -315,7 +315,7 @@ public class Main {
         // Phase 3: TSP
         if (universities.size() >= 3) {
             System.out.println("\n3. Traveling Salesman Problem (TSP):");
-            Node startTSP = universities.get(0);
+            Node startTSP = universities.getFirst();
             TSP.TSPResult tspResult = TSP.solveTSPWithBitmasking(universities, startTSP);
             
             System.out.println("   TSP Tour starting from " + startTSP.getName() + ":");
@@ -399,23 +399,20 @@ public class Main {
         }
         
         // Start graphical interface
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // Set system Look and Feel
-                    javax.swing.UIManager.setLookAndFeel(
-                        javax.swing.UIManager.getSystemLookAndFeelClassName());
-                } catch (Exception e) {
-                    // In case of error, use default
-                }
-                
-                GraphApp app = new GraphApp();
-                app.setVisible(true);
-                
-                // Update graph with console data
-                GraphApp.updateFromConsole(universities);
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            try {
+                // Set system Look and Feel
+                javax.swing.UIManager.setLookAndFeel(
+                    javax.swing.UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                // In case of error, use default
             }
+
+            GraphApp app = new GraphApp();
+            app.setVisible(true);
+
+            // Update graph with console data
+            GraphApp.updateFromConsole(universities);
         });
         
         System.out.println("GUI launched successfully!");

@@ -114,7 +114,7 @@ public class Bfs {
                 while (!queue.isEmpty()) {
                     Node current = queue.poll();
                     
-                    // Find first suitable color
+                    // Find the first suitable color
                     for (Color color : colors) {
                         boolean canUse = true;
                         for (Edge edge : current.getEdges()) {
