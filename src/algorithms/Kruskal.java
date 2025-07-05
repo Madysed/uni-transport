@@ -4,6 +4,8 @@ import models.Edge;
 import models.Node;
 import java.util.*;
 
+import static utils.EdgeUtils.createEdgeKey;
+
 public class Kruskal {
     
     public static List<Edge> findMST(List<Node> nodes) {
@@ -58,18 +60,8 @@ public class Kruskal {
         return mstEdges;
     }
     
-    // Create unique key for edge independent of direction
-    private static String createEdgeKey(Node source, Node destination) {
-        String name1 = source.getName();
-        String name2 = destination.getName();
-        
-        // Sort names to create unique key
-        if (name1.compareTo(name2) < 0) { //0 if equall, <0 if less
-            return name1 + "-" + name2;
-        } else {
-            return name2 + "-" + name1;
-        }
-    }
+
+
     
     public static double calculateMSTCost(List<Edge> mstEdges) {
         double totalCost = 0;
@@ -77,13 +69,5 @@ public class Kruskal {
             totalCost += edge.getWeight();
         }
         return totalCost;
-    }
-    
-    // Check if graph is connected
-    public static boolean isGraphConnected(List<Node> nodes) {
-        if (nodes.size() <= 1) return true;
-        
-        List<Edge> mstEdges = findMST(nodes);
-        return mstEdges.size() == nodes.size() - 1;
     }
 } 
