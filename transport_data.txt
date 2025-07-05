@@ -1,8 +1,29 @@
 # Universities
-a,618.2716486542699,295.57596284618165
-b,347.06218558732286,353.3476367514975
-c,157.3409489210981,400.00818442305774
+Tabriz University,895.0,331.0
+Kerman University,837.0,507.0
+Ferdowsi University,687.0,616.0
+Shahid Beheshti University,503.0,616.0
+Tehran University,353.0,507.0
+Shiraz University,295.0,331.0
+Isfahan University of Technology,353.0,155.0
+Amirkabir University of Technology,503.0,46.0
+Sharif University of Technology,687.0,46.0
+guilan,837.0,155.0
 
 # Routes
-a,b,222.0,22.0,22,06:00-22:00
-b,c,3333.0,33.0,33,06:00-22:00
+Tabriz University,Shahid Beheshti University,200.0,60000.0,32,07:30-20:30
+Tabriz University,Kerman University,1111.0,11111.0,111,1
+Tabriz University,Tehran University,650.0,195000.0,45,06:00-23:00
+Kerman University,Ferdowsi University,450.0,135000.0,38,05:30-22:30
+Kerman University,Shahid Beheshti University,11.0,1.0,1,1
+Kerman University,Shiraz University,300.0,90000.0,28,06:30-21:30
+Ferdowsi University,Shahid Beheshti University,2.0,2.0,2,6:00
+Ferdowsi University,Isfahan University of Technology,120.0,36000.0,15,07:00-22:00
+Shahid Beheshti University,Tehran University,25.0,7500.0,8,05:30-23:30
+Shahid Beheshti University,Amirkabir University of Technology,15.0,4500.0,6,06:00-23:00
+Tehran University,Amirkabir University of Technology,8.0,2400.0,4,05:00-24:00
+Tehran University,Sharif University of Technology,12.0,3600.0,5,05:30-23:30
+Shiraz University,Isfahan University of Technology,280.0,84000.0,25,06:00-22:00
+Shiraz University,guilan,10.0,500.0,20,8:00-12:00
+Isfahan University of Technology,Amirkabir University of Technology,180.0,54000.0,20,06:30-21:30
+Amirkabir University of Technology,Sharif University of Technology,5.0,1500.0,3,06:00-23:00
