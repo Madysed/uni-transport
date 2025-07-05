@@ -8,6 +8,27 @@ import models.Node;
 import java.util.*;
 
 public class Bfs {
+
+    public static Map<Node, Integer> bfs(Node start, Map<Node, Map<Node, Double>> graph) {
+        Map<Node, Integer> dist = new HashMap<>();
+        Queue<Node> queue = new LinkedList<>();
+        dist.put(start, 0);
+        queue.add(start);
+
+        while (!queue.isEmpty()) {
+            Node u = queue.poll();
+            int d = dist.get(u);
+            if (graph.containsKey(u)) {
+                for (Node v:graph.get(u).keySet()) {
+                    if (!dist.containsKey(v)) {
+                        dist.put(v,d+1);
+                        queue.add(v);
+                    }
+                }
+            }
+        }
+        return dist;
+    }
     
     public static List<Node> breadthFirstSearch(List<Node> nodes, Node start, Node target) {
         if (start == null || target == null) return new ArrayList<>();

@@ -5,7 +5,54 @@ import models.Node;
 
 import java.util.*;
 
+import static algorithms.Bfs.bfs;
+import static utils.EdgeUtils.createEdgeKey;
+
 public class SD2 {
+
+    public static List<Edge> findSD2Edges(List<Node> nodes,List<Edge> mstEdges) {
+        List<Edge> allEdges = new ArrayList<>();
+        List<Edge> sD2Edges = new ArrayList<>();
+        Set<String> addedEdges = new HashSet<>();
+
+        // Collect all edges without duplicates
+        for (Node node : nodes) {
+            for (Edge edge : node.getEdges()) {
+                // Create unique key for edge (direction independent)
+                String edgeKey = createEdgeKey(edge.getSource(), edge.getDestination());
+                if (!addedEdges.contains(edgeKey)) {
+                    allEdges.add(edge);
+                    addedEdges.add(edgeKey);
+                }
+            }
+        }
+
+        // Sort edges by weight
+        allEdges.sort(Comparator.comparingDouble(Edge::getWeight));
+        return sD2Edges;
+    }
+
+
+    public static Map<Node, List<Node>> satisfiesDiameter2(List<Node> unis, Map<Node, Map<Node, Double>> graph) {
+//        List<Node> nD2Nodes = new ArrayList<>();
+        Map<Node, List<Node>> nD2Nodes = new HashMap<>();
+        for (Node u : unis) {
+            List<Node> tmp = new ArrayList<>();
+            Map<Node, Integer> dist = bfs(u, graph);
+            for (Node v : unis) {
+
+                if (!u.equals(v) && dist.getOrDefault(v, Integer.MAX_VALUE) > 2) {
+                    tmp.add(v);
+
+                }
+            }
+            if (!tmp.isEmpty()) {
+                nD2Nodes.put(u, tmp);
+            }
+
+        }
+        return nD2Nodes;
+    }
     
     // Floyd-Warshall algorithm for finding shortest paths between all pairs of nodes
     public static double[][] floydWarshall(List<Node> nodes) {
