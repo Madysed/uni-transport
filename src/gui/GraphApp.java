@@ -821,7 +821,7 @@ public class GraphApp extends JFrame {
             graphPane.arrangeNodes();
 
             // Save to file
-            InputHandler.saveDataToFile("transport_data.txt", graphPane.getNodes());
+//            InputHandler.saveDataToFile("transport_data.txt", graphPane.getNodes());
 
             updateNodeCombos();
             updateStatus("Removed university: " + selectedName);
