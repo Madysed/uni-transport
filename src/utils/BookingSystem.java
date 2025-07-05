@@ -7,9 +7,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class BookingSystem {
-    private List<Reservation> reservations;
-    private List<Student> students;
-    private Map<String, Integer> routeCapacityUsage; // Key: route_id, Value: usage count
+    private final List<Reservation> reservations;
+    private final List<Student> students;
+    private final Map<String, Integer> routeCapacityUsage; // Key: route_id, Value: usage count
     private static BookingSystem instance;
     
     private BookingSystem() {
@@ -203,10 +203,10 @@ public class BookingSystem {
     
     // Reservation result class
     public static class ReservationResult {
-        private boolean success;
-        private String message;
-        private Reservation reservation;
-        private List<Edge> alternativeRoutes;
+        private final boolean success;
+        private final String message;
+        private final Reservation reservation;
+        private final List<Edge> alternativeRoutes;
         
         public ReservationResult(boolean success, String message, Reservation reservation, List<Edge> alternativeRoutes) {
             this.success = success;
