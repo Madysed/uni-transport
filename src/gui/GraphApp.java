@@ -418,14 +418,13 @@ public class GraphApp extends JFrame {
     private void updateNodeCombos() {
         startNodeCombo.removeAllItems();
         endNodeCombo.removeAllItems();
-
         for (Node node : graphPane.getNodes()) {
-            startNodeCombo.addItem(node.getName());
-            endNodeCombo.addItem(node.getName());
+            String displayName = node.getName().length() > 20 ? node.getName().substring(0, 17) + "..." : node.getName();
+            startNodeCombo.addItem(displayName);
+            endNodeCombo.addItem(displayName);
         }
-
-        // Set end node selection capability
         String selectedAlgorithm = (String) algorithmCombo.getSelectedItem();
+        assert selectedAlgorithm != null;
         boolean needsEndNode = selectedAlgorithm.contains("Shortest Path");
         endNodeCombo.setEnabled(needsEndNode);
     }
