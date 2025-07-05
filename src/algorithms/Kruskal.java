@@ -2,7 +2,6 @@ package algorithms;
 
 import models.Edge;
 import models.Node;
-
 import java.util.*;
 
 public class Kruskal {
@@ -65,7 +64,7 @@ public class Kruskal {
         String name2 = destination.getName();
         
         // Sort names to create unique key
-        if (name1.compareTo(name2) < 0) {
+        if (name1.compareTo(name2) < 0) { //0 if equall, <0 if less
             return name1 + "-" + name2;
         } else {
             return name2 + "-" + name1;
