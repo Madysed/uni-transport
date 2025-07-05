@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 public class Reservation {
-    private String reservationId;
+    private final String reservationId;
     private Student student;
     private Edge route;
     private LocalDateTime bookingTime;
