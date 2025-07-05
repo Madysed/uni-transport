@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.List;
 
 public class GraphPane extends JPanel {
-    private List<Node> nodes;
+    private final List<Node> nodes;
     private List<Edge> highlightedEdges;
     private List<Node> highlightedPath;
     private List<Edge> animationEdges;
@@ -19,7 +19,7 @@ public class GraphPane extends JPanel {
     private int animationStep;
     private boolean showAnimation;
     private String animationType = ""; // "MST", "DIJKSTRA", "TSP"
-    private java.util.Map<Node, String> nodeLabels = new java.util.HashMap<>();
+    private final java.util.Map<Node, String> nodeLabels = new java.util.HashMap<>();
     
     // Zoom and pan variables
     private double zoomFactor = 1.0;
@@ -651,13 +651,13 @@ public class GraphPane extends JPanel {
                 // Check start and destination nodes
                 if (smartDijkstraResult != null && !smartDijkstraResult.getPath().isEmpty()) {
                     List<Node> path = smartDijkstraResult.getPath();
-                    if (node.equals(path.get(0))) {
+                    if (node.equals(path.getFirst())) {
                         // Start node - dark blue
                         nodeColor = SMART_DIJKSTRA_START_COLOR;
                         borderColor = new java.awt.Color(10, 90, 200);
                         borderWidth = 5;
                         isStartNode = true;
-                    } else if (node.equals(path.get(path.size() - 1))) {
+                    } else if (node.equals(path.getLast())) {
                         // Destination node - pink red
                         nodeColor = SMART_DIJKSTRA_DESTINATION_COLOR;
                         borderColor = new java.awt.Color(180, 40, 110);
@@ -1065,12 +1065,12 @@ public class GraphPane extends JPanel {
         StringBuilder currentLine = new StringBuilder();
         
         for (String word : words) {
-            String testLine = currentLine.length() == 0 ? word : currentLine + " " + word;
+            String testLine = currentLine.isEmpty() ? word : currentLine + " " + word;
             
             if (fm.stringWidth(testLine) <= maxWidth) {
                 currentLine = new StringBuilder(testLine);
             } else {
-                if (currentLine.length() > 0) {
+                if (!currentLine.isEmpty()) {
                     lines.add(currentLine.toString());
                     currentLine = new StringBuilder(word);
                 } else {
@@ -1080,7 +1080,7 @@ public class GraphPane extends JPanel {
             }
         }
         
-        if (currentLine.length() > 0) {
+        if (!currentLine.isEmpty()) {
             lines.add(currentLine.toString());
         }
         

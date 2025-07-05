@@ -12,7 +12,6 @@ public class Student {
     private Node destination;
     private LocalDateTime travelTime;
     private boolean isActive;
-    private String preferredTransport;
     private double maxBudget;
     
     public Student(String name, String phoneNumber, String email) {
@@ -21,7 +20,6 @@ public class Student {
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.isActive = true;
-        this.preferredTransport = "Bus";
         this.maxBudget = 100000.0; // Default 100,000 Toman
     }
     
@@ -55,9 +53,6 @@ public class Student {
     
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { this.isActive = active; }
-    
-    public String getPreferredTransport() { return preferredTransport; }
-    public void setPreferredTransport(String preferredTransport) { this.preferredTransport = preferredTransport; }
     
     public double getMaxBudget() { return maxBudget; }
     public void setMaxBudget(double maxBudget) { this.maxBudget = maxBudget; }
