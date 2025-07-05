@@ -6,7 +6,7 @@ import java.util.List;
 public class Node {
     private String name;
     private double x, y;
-    private List<Edge> edges;
+    private final List<Edge> edges;
     private boolean visited;
     private double distance;
     private Node parent;
