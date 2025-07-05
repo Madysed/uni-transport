@@ -11,7 +11,7 @@ public class UnionFind {
         rank = new int[n];
         size = new int[n];
         components = n;
-        
+
         for (int i = 0; i < n; i++) {
             parent[i] = i;
             rank[i] = 0;

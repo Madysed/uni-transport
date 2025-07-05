@@ -49,68 +49,68 @@ public class SD2 {
     }
     
     // Find shortest path between two specific nodes
-    public static List<Node> findShortestPath(List<Node> nodes, Node start, Node end) {
-        int n = nodes.size();
-        int startIdx = nodes.indexOf(start);
-        int endIdx = nodes.indexOf(end);
-        
-        if (startIdx == -1 || endIdx == -1) {
-            return new ArrayList<>();
-        }
-        
-        double[][] dist = floydWarshall(nodes);
-        int[][] next = new int[n][n];
-        
-        // Initial assignment for path reconstruction
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                next[i][j] = -1;
-            }
-        }
-        
-        // Build next table
-        for (int i = 0; i < n; i++) {
-            Node node = nodes.get(i);
-            for (Edge edge : node.getEdges()) {
-                int j = nodes.indexOf(edge.getDestination());
-                if (j != -1) {
-                    next[i][j] = j;
-                }
-            }
-        }
-        
-        // Update next table
-        for (int k = 0; k < n; k++) {
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    if (dist[i][k] != Double.MAX_VALUE && dist[k][j] != Double.MAX_VALUE) {
-                        if (dist[i][k] + dist[k][j] < dist[i][j]) {
-                            next[i][j] = next[i][k];
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Path reconstruction
-        List<Node> path = new ArrayList<>();
-        if (dist[startIdx][endIdx] == Double.MAX_VALUE) {
-            return path; // Path does not exist
-        }
-        
-        int current = startIdx;
-        while (current != endIdx) {
-            path.add(nodes.get(current));
-            current = next[current][endIdx];
-            if (current == -1) break;
-        }
-        
-        if (current == endIdx) {
-            path.add(nodes.get(endIdx));
-        }
-        
-        return path;
-    }
+//    public static List<Node> findShortestPath(List<Node> nodes, Node start, Node end) {
+//        int n = nodes.size();
+//        int startIdx = nodes.indexOf(start);
+//        int endIdx = nodes.indexOf(end);
+//
+//        if (startIdx == -1 || endIdx == -1) {
+//            return new ArrayList<>();
+//        }
+//
+//        double[][] dist = floydWarshall(nodes);
+//        int[][] next = new int[n][n];
+//
+//        // Initial assignment for path reconstruction
+//        for (int i = 0; i < n; i++) {
+//            for (int j = 0; j < n; j++) {
+//                next[i][j] = -1;
+//            }
+//        }
+//
+//        // Build next table
+//        for (int i = 0; i < n; i++) {
+//            Node node = nodes.get(i);
+//            for (Edge edge : node.getEdges()) {
+//                int j = nodes.indexOf(edge.getDestination());
+//                if (j != -1) {
+//                    next[i][j] = j;
+//                }
+//            }
+//        }
+//
+//        // Update next table
+//        for (int k = 0; k < n; k++) {
+//            for (int i = 0; i < n; i++) {
+//                for (int j = 0; j < n; j++) {
+//                    if (dist[i][k] != Double.MAX_VALUE && dist[k][j] != Double.MAX_VALUE) {
+//                        if (dist[i][k] + dist[k][j] < dist[i][j]) {
+//                            next[i][j] = next[i][k];
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Path reconstruction
+//        List<Node> path = new ArrayList<>();
+//        if (dist[startIdx][endIdx] == Double.MAX_VALUE) {
+//            return path; // Path does not exist
+//        }
+//
+//        int current = startIdx;
+//        while (current != endIdx) {
+//            path.add(nodes.get(current));
+//            current = next[current][endIdx];
+//            if (current == -1) break;
+//        }
+//
+//        if (current == endIdx) {
+//            path.add(nodes.get(endIdx));
+//        }
+//
+//        return path;
+//    }
     
     // Find graph center (node whose sum of distances to other nodes is minimum)
     public static Node findCenter(List<Node> nodes) {
