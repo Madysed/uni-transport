@@ -54,8 +54,8 @@ public class Bfs {
         Set<Node> visited = new HashSet<>();
         Queue<Node> queue = new LinkedList<>();
         
-        queue.offer(nodes.get(0));
-        visited.add(nodes.get(0));
+        queue.offer(nodes.getFirst());
+        visited.add(nodes.getFirst());
         
         while (!queue.isEmpty()) {
             Node current = queue.poll();
