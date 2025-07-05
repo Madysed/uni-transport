@@ -10,9 +10,12 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+import static resources.Global_variables.*;
+
 public class GraphPane extends JPanel {
     private final List<Node> nodes;
     private List<Edge> highlightedEdges;
+    private List<Edge> highlightedEdgesYellow;
     private List<Node> highlightedPath;
     private List<Edge> animationEdges;
     private List<Node> animationNodes;
@@ -27,39 +30,6 @@ public class GraphPane extends JPanel {
     private int offsetY = 0;
     private boolean dragging = false;
     private int lastMouseX, lastMouseY;
-    
-    private static final int NODE_RADIUS = 35;
-    private static final java.awt.Color NODE_COLOR = new java.awt.Color(173, 216, 230);
-    private static final java.awt.Color HIGHLIGHTED_NODE_COLOR = new java.awt.Color(255, 215, 0);
-    private static final java.awt.Color EDGE_COLOR = new java.awt.Color(70, 70, 70);
-    private static final java.awt.Color HIGHLIGHTED_EDGE_COLOR = new java.awt.Color(220, 20, 60);
-    private static final java.awt.Color PATH_COLOR = new java.awt.Color(30, 144, 255);
-    private static final java.awt.Color TEXT_COLOR = new java.awt.Color(25, 25, 112);
-    private static final java.awt.Color BACKGROUND_COLOR = new java.awt.Color(248, 248, 255);
-    private static final java.awt.Color ANIMATION_COLOR = new java.awt.Color(255, 69, 0);
-    private static final java.awt.Color VISITED_COLOR = new java.awt.Color(144, 238, 144);
-    
-    // Enhanced colors for animations
-    private static final java.awt.Color DIJKSTRA_START_COLOR = new java.awt.Color(0, 123, 255);      // Light blue
-    private static final java.awt.Color DIJKSTRA_CURRENT_COLOR = new java.awt.Color(255, 193, 7);    // Golden yellow
-    private static final java.awt.Color DIJKSTRA_VISITED_COLOR = new java.awt.Color(40, 167, 69);    // Green
-    private static final java.awt.Color DIJKSTRA_DESTINATION_COLOR = new java.awt.Color(220, 53, 69); // Red
-    private static final java.awt.Color DIJKSTRA_UNVISITED_COLOR = new java.awt.Color(108, 117, 125); // Gray
-    private static final java.awt.Color DIJKSTRA_CANDIDATE_COLOR = new java.awt.Color(255, 206, 84);  // Light yellow
-    private static final java.awt.Color DIJKSTRA_EXPLORING_COLOR = new java.awt.Color(255, 99, 71);   // Orange red
-    
-    // Special colors for smart Dijkstra
-    private static final java.awt.Color SMART_DIJKSTRA_START_COLOR = new java.awt.Color(13, 110, 253);   // Dark blue
-    private static final java.awt.Color SMART_DIJKSTRA_CURRENT_COLOR = new java.awt.Color(255, 143, 0);  // Orange
-    private static final java.awt.Color SMART_DIJKSTRA_VISITED_COLOR = new java.awt.Color(25, 135, 84);  // Dark green
-    private static final java.awt.Color SMART_DIJKSTRA_DESTINATION_COLOR = new java.awt.Color(214, 51, 132); // Pink red
-    private static final java.awt.Color SMART_DIJKSTRA_UNVISITED_COLOR = new java.awt.Color(173, 181, 189); // Light gray
-    private static final java.awt.Color SMART_DIJKSTRA_PROCESSING_COLOR = new java.awt.Color(255, 87, 34);  // Orange red
-    private static final java.awt.Color SMART_DIJKSTRA_OPTIMAL_PATH_COLOR = new java.awt.Color(156, 39, 176); // Purple
-    
-    // General animation colors
-    private static final java.awt.Color ANIMATION_GLOW_COLOR = new java.awt.Color(255, 255, 0, 80);
-    private static final java.awt.Color PULSE_COLOR = new java.awt.Color(255, 255, 255, 150);
     
     // Animation variables
     private long animationStartTime;
