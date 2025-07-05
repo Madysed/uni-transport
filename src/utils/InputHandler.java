@@ -127,25 +127,6 @@ public class InputHandler {
         }
     }
 
-    // Old functions - for compatibility
-    public static List<Node> loadNodesFromFile(String filename) {
-        return loadDataFromFile(filename);
-    }
-
-    public static void loadEdgesFromFile(String filename, List<Node> nodes) {
-        // This function is no longer used because everything is done in loadDataFromFile
-        // But kept for compatibility
-    }
-
-    public static void saveNodesToFile(String filename, List<Node> nodes) {
-        saveDataToFile(filename, nodes);
-    }
-
-    public static void saveEdgesToFile(String filename, List<Node> nodes) {
-        // This function is no longer used because everything is done in saveDataToFile
-        // But kept for compatibility
-    }
-
     private static Node findNodeByName(List<Node> nodes, String name) {
         for (Node node : nodes) {
             if (node.getName().equals(name)) {
