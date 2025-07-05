@@ -1,3 +1,9 @@
+import algorithms.*;
+import gui.GraphApp;
+import models.Edge;
+import models.Node;
+import utils.InputHandler;
+
 import java.util.*;
 
 public class Main {
