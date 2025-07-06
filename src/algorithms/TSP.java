@@ -8,9 +8,9 @@ import java.util.*;
 public class TSP {
     
     public static class TSPResult {
-        private List<Node> path;
-        private double totalCost;
-        private double totalTime;
+        private final List<Node> path;
+        private final double totalCost;
+        private final double totalTime;
         private List<Node> visitedOrder;
         private String details;
         
