@@ -4,12 +4,14 @@ import models.Edge;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Reservation {
     private final String reservationId;
     private Student student;
-    private Edge route;
+    private List<Edge> pathEdges;  // Changed from single Edge to List<Edge>
     private LocalDateTime bookingTime;
     private LocalDateTime travelTime;
     private ReservationStatus status;
@@ -24,22 +26,36 @@ public class Reservation {
         COMPLETED    // Completed
     }
     
+    // Legacy constructor for single edge
     public Reservation(Student student, Edge route, LocalDateTime travelTime) {
+        this(student, route, travelTime, 1);
+    }
+    
+    // Legacy constructor for single edge with seats
+    public Reservation(Student student, Edge route, LocalDateTime travelTime, int seatsReserved) {
         this.reservationId = UUID.randomUUID().toString().substring(0, 8);
         this.student = student;
-        this.route = route;
+        this.pathEdges = new ArrayList<>();
+        this.pathEdges.add(route);
         this.travelTime = travelTime;
         this.bookingTime = LocalDateTime.now();
         this.status = ReservationStatus.PENDING;
-        this.totalCost = route.getCost();
-        this.seatsReserved = 1;
+        this.totalCost = route.getCost() * seatsReserved;
+        this.seatsReserved = seatsReserved;
         this.notes = "";
     }
     
-    public Reservation(Student student, Edge route, LocalDateTime travelTime, int seatsReserved) {
-        this(student, route, travelTime);
+    // New constructor for path reservation
+    public Reservation(Student student, List<Edge> pathEdges, LocalDateTime travelTime, int seatsReserved) {
+        this.reservationId = UUID.randomUUID().toString().substring(0, 8);
+        this.student = student;
+        this.pathEdges = new ArrayList<>(pathEdges);
+        this.travelTime = travelTime;
+        this.bookingTime = LocalDateTime.now();
+        this.status = ReservationStatus.PENDING;
+        this.totalCost = pathEdges.stream().mapToDouble(Edge::getCost).sum() * seatsReserved;
         this.seatsReserved = seatsReserved;
-        this.totalCost = route.getCost() * seatsReserved;
+        this.notes = "";
     }
     
     // Getters and Setters
@@ -48,8 +64,17 @@ public class Reservation {
     public Student getStudent() { return student; }
     public void setStudent(Student student) { this.student = student; }
     
-    public Edge getRoute() { return route; }
-    public void setRoute(Edge route) { this.route = route; }
+    public List<Edge> getPathEdges() { return pathEdges; }
+    public void setPathEdges(List<Edge> pathEdges) { this.pathEdges = pathEdges; }
+    
+    // Legacy support - returns first edge of path
+    public Edge getRoute() { return pathEdges.isEmpty() ? null : pathEdges.get(0); }
+    public void setRoute(Edge route) { 
+        this.pathEdges = new ArrayList<>();
+        if (route != null) {
+            this.pathEdges.add(route);
+        }
+    }
     
     public LocalDateTime getBookingTime() { return bookingTime; }
     public void setBookingTime(LocalDateTime bookingTime) { this.bookingTime = bookingTime; }
@@ -91,7 +116,17 @@ public class Reservation {
     }
     
     public String getRouteString() {
-        return route.getSource().getName() + " → " + route.getDestination().getName();
+        if (pathEdges.isEmpty()) return "No route";
+        
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < pathEdges.size(); i++) {
+            Edge edge = pathEdges.get(i);
+            if (i == 0) {
+                sb.append(edge.getSource().getName());
+            }
+            sb.append(" → ").append(edge.getDestination().getName());
+        }
+        return sb.toString();
     }
     
     public boolean canBeCancelled() {

@@ -51,32 +51,54 @@ public class BookingSystem {
             .orElse(null);
     }
     
-    // Reservation management
+    // Path Reservation management
+    public ReservationResult makePathReservation(Student student, List<Edge> pathEdges, LocalDateTime travelTime) {
+        return makePathReservation(student, pathEdges, travelTime, 1);
+    }
+    
+    public ReservationResult makePathReservation(Student student, List<Edge> pathEdges, LocalDateTime travelTime, int seatsRequested) {
+        if (pathEdges == null || pathEdges.isEmpty()) {
+            return new ReservationResult(false, "Invalid path: no edges provided.", null, null);
+        }
+        
+        // Check capacity for all edges in the path
+        for (Edge edge : pathEdges) {
+            if (!hasCapacity(edge, seatsRequested)) {
+                return new ReservationResult(false, 
+                    "Not enough capacity on route: " + edge.getSource().getName() + " → " + edge.getDestination().getName(), 
+                    null, 
+                    findAlternativeRoutes(edge));
+            }
+        }
+        
+        // Calculate total cost for the path
+        double totalCost = pathEdges.stream().mapToDouble(Edge::getCost).sum() * seatsRequested;
+        
+        // Check student budget
+        if (totalCost > student.getMaxBudget()) {
+            return new ReservationResult(false, "Not enough budget for this path.", null, findCheaperRoutes(pathEdges.get(0), student.getMaxBudget()));
+        }
+        
+        // Create reservation for the complete path
+        Reservation reservation = new Reservation(student, pathEdges, travelTime, seatsRequested);
+        reservations.add(reservation);
+        
+        // Update capacity usage for all edges in the path
+        for (Edge edge : pathEdges) {
+            String routeKey = getRouteKey(edge);
+            routeCapacityUsage.put(routeKey, routeCapacityUsage.getOrDefault(routeKey, 0) + seatsRequested);
+        }
+        
+        return new ReservationResult(true, "Path reservation made successfully.", reservation, null);
+    }
+    
+    // Single edge reservation (legacy support)
     public ReservationResult makeReservation(Student student, Edge route, LocalDateTime travelTime) {
         return makeReservation(student, route, travelTime, 1);
     }
     
     public ReservationResult makeReservation(Student student, Edge route, LocalDateTime travelTime, int seatsRequested) {
-        // Check capacity
-        if (!hasCapacity(route, seatsRequested)) {
-            return new ReservationResult(false, "Not enough capacity on this route.", null, findAlternativeRoutes(route));
-        }
-        
-        // Check student budget
-        double totalCost = route.getCost() * seatsRequested;
-        if (totalCost > student.getMaxBudget()) {
-            return new ReservationResult(false, "Not enough budget for this route.", null, findCheaperRoutes(route, student.getMaxBudget()));
-        }
-        
-        // Create reservation
-        Reservation reservation = new Reservation(student, route, travelTime, seatsRequested);
-        reservations.add(reservation);
-        
-        // Update capacity usage
-        String routeKey = getRouteKey(route);
-        routeCapacityUsage.put(routeKey, routeCapacityUsage.getOrDefault(routeKey, 0) + seatsRequested);
-        
-        return new ReservationResult(true, "Reservation made successfully.", reservation, null);
+        return makePathReservation(student, Collections.singletonList(route), travelTime, seatsRequested);
     }
     
     public boolean cancelReservation(String reservationId) {
@@ -89,10 +111,12 @@ public class BookingSystem {
             if (reservation.canBeCancelled()) {
                 reservation.setStatus(Reservation.ReservationStatus.CANCELLED);
                 
-                // Free up capacity
-                String routeKey = getRouteKey(reservation.getRoute());
-                int currentUsage = routeCapacityUsage.getOrDefault(routeKey, 0);
-                routeCapacityUsage.put(routeKey, Math.max(0, currentUsage - reservation.getSeatsReserved()));
+                // Free up capacity for all edges in the path
+                for (Edge edge : reservation.getPathEdges()) {
+                    String routeKey = getRouteKey(edge);
+                    int currentUsage = routeCapacityUsage.getOrDefault(routeKey, 0);
+                    routeCapacityUsage.put(routeKey, Math.max(0, currentUsage - reservation.getSeatsReserved()));
+                }
                 
                 return true;
             }
@@ -181,7 +205,7 @@ public class BookingSystem {
     public List<Reservation> getReservationsForRoute(Edge route) {
         String routeKey = getRouteKey(route);
         return reservations.stream()
-            .filter(r -> getRouteKey(r.getRoute()).equals(routeKey))
+            .filter(r -> r.getPathEdges().stream().anyMatch(e -> getRouteKey(e).equals(routeKey)))
             .collect(Collectors.toList());
     }
     

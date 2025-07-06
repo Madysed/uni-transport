@@ -166,73 +166,69 @@ public class GraphApp extends JFrame {
 
         // Control panel
         JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new FlowLayout());
+        controlPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         controlPanel.add(new JLabel("Algorithm:"));
         controlPanel.add(algorithmCombo);
         controlPanel.add(new JLabel("Start:"));
         controlPanel.add(startNodeCombo);
         controlPanel.add(new JLabel("End:"));
         controlPanel.add(endNodeCombo);
+
         // Style main control buttons
         startButton.setBackground(new java.awt.Color(76, 175, 80));
         startButton.setForeground(java.awt.Color.WHITE);
         startButton.setOpaque(true);
         startButton.setBorderPainted(false);
         controlPanel.add(startButton);
-
+        
         pauseButton.setBackground(new java.awt.Color(255, 193, 7));
         pauseButton.setForeground(java.awt.Color.BLACK);
         pauseButton.setOpaque(true);
         pauseButton.setBorderPainted(false);
         controlPanel.add(pauseButton);
-
+        
         resetButton.setBackground(new java.awt.Color(158, 158, 158));
         resetButton.setForeground(java.awt.Color.WHITE);
         resetButton.setOpaque(true);
         resetButton.setBorderPainted(false);
         controlPanel.add(resetButton);
 
+        // Speed panel
+        JPanel speedPanel = new JPanel();
+        speedPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        speedPanel.add(new JLabel("Speed (ms):"));
+        speedPanel.add(speedSlider);
+
+        // Action buttons panel (colored buttons)
+        JPanel actionButtonsPanel = new JPanel();
+        actionButtonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+
         // Add university button
         JButton addUniversityButton = new JButton("Add University");
-        addUniversityButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addNewUniversity();
-            }
-        });
+        addUniversityButton.addActionListener(e -> addNewUniversity());
         addUniversityButton.setBackground(new java.awt.Color(46, 125, 50));
         addUniversityButton.setForeground(java.awt.Color.WHITE);
         addUniversityButton.setOpaque(true);
         addUniversityButton.setBorderPainted(false);
-        controlPanel.add(addUniversityButton);
+        actionButtonsPanel.add(addUniversityButton);
 
         // Add route button
         JButton addRouteButton = new JButton("Add Route");
-        addRouteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addNewRoute();
-            }
-        });
+        addRouteButton.addActionListener(e -> addNewRoute());
         addRouteButton.setBackground(new java.awt.Color(2, 136, 209));
         addRouteButton.setForeground(java.awt.Color.WHITE);
         addRouteButton.setOpaque(true);
         addRouteButton.setBorderPainted(false);
-        controlPanel.add(addRouteButton);
+        actionButtonsPanel.add(addRouteButton);
 
         // Remove university button
         JButton removeUniversityButton = new JButton("Remove University");
-        removeUniversityButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removeUniversity();
-            }
-        });
+        removeUniversityButton.addActionListener(e -> removeUniversity());
         removeUniversityButton.setBackground(new java.awt.Color(244, 67, 54));
         removeUniversityButton.setForeground(java.awt.Color.WHITE);
         removeUniversityButton.setOpaque(true);
         removeUniversityButton.setBorderPainted(false);
-        controlPanel.add(removeUniversityButton);
+        actionButtonsPanel.add(removeUniversityButton);
 
         // TSP buttons
         JButton planTourButton = new JButton("Plan University Tour");
@@ -241,7 +237,7 @@ public class GraphApp extends JFrame {
         planTourButton.setForeground(java.awt.Color.WHITE);
         planTourButton.setOpaque(true);
         planTourButton.setBorderPainted(false);
-        controlPanel.add(planTourButton);
+        actionButtonsPanel.add(planTourButton);
 
         JButton showMatrixButton = new JButton("Show Cost Matrix");
         showMatrixButton.addActionListener(e -> showCostMatrix());
@@ -249,38 +245,33 @@ public class GraphApp extends JFrame {
         showMatrixButton.setForeground(java.awt.Color.WHITE);
         showMatrixButton.setOpaque(true);
         showMatrixButton.setBorderPainted(false);
-        controlPanel.add(showMatrixButton);
+        actionButtonsPanel.add(showMatrixButton);
 
-        // Student management buttons (with colors)
+        // Student management buttons
         addStudentButton.setBackground(new java.awt.Color(33, 150, 243));
         addStudentButton.setForeground(java.awt.Color.WHITE);
         addStudentButton.setOpaque(true);
         addStudentButton.setBorderPainted(false);
-        controlPanel.add(addStudentButton);
+        actionButtonsPanel.add(addStudentButton);
 
         viewReservationsButton.setBackground(new java.awt.Color(76, 175, 80));
         viewReservationsButton.setForeground(java.awt.Color.WHITE);
         viewReservationsButton.setOpaque(true);
         viewReservationsButton.setBorderPainted(false);
-        controlPanel.add(viewReservationsButton);
+        actionButtonsPanel.add(viewReservationsButton);
 
         manageStudentsButton.setBackground(new java.awt.Color(255, 152, 0));
         manageStudentsButton.setForeground(java.awt.Color.WHITE);
         manageStudentsButton.setOpaque(true);
         manageStudentsButton.setBorderPainted(false);
-        controlPanel.add(manageStudentsButton);
+        actionButtonsPanel.add(manageStudentsButton);
 
-        // Speed panel
-        JPanel speedPanel = new JPanel();
-        speedPanel.setLayout(new FlowLayout());
-        speedPanel.add(new JLabel("Speed (ms):"));
-        speedPanel.add(speedSlider);
-
-        // Top panel
+        // Top panel with vertical layout
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.add(controlPanel);
         topPanel.add(speedPanel);
+        topPanel.add(actionButtonsPanel);  // Action buttons added below speed panel
 
         // Status panel
         JPanel statusPanel = new JPanel();
@@ -294,6 +285,7 @@ public class GraphApp extends JFrame {
         rightPanel.setPreferredSize(new Dimension(350, 0));
         rightPanel.add(reservationPanel, BorderLayout.CENTER);
 
+        // Main layout
         add(topPanel, BorderLayout.NORTH);
         add(graphPane, BorderLayout.CENTER);
         add(rightPanel, BorderLayout.EAST);
@@ -1147,10 +1139,8 @@ public class GraphApp extends JFrame {
             return;
         }
 
-        Edge firstEdge = selectedPath.getUsedEdges().get(0);
-
-        BookingSystem.ReservationResult result = bookingSystem.makeReservation(
-            student, firstEdge, LocalDateTime.now().plusHours(1));
+        BookingSystem.ReservationResult result = bookingSystem.makePathReservation(
+            student, selectedPath.getUsedEdges(), LocalDateTime.now().plusHours(1));
 
         if (result.isSuccess()) {
             updateReservationList();
@@ -1176,14 +1166,22 @@ public class GraphApp extends JFrame {
             JOptionPane.showMessageDialog(this, scrollPane, "Reservation Successful", JOptionPane.INFORMATION_MESSAGE);
 
         } else {
-            String message = result.getMessage();
-            if (!result.getAlternativeRoutes().isEmpty()) {
-                message += "\n\nAlternative routes available:";
-                for (Edge alt : result.getAlternativeRoutes()) {
-                    message += "\n• " + alt.getRouteInfo();
+            // Show error with alternative routes if available
+            StringBuilder errorMsg = new StringBuilder(result.getMessage());
+            List<Edge> alternatives = result.getAlternativeRoutes();
+            
+            if (alternatives != null && !alternatives.isEmpty()) {
+                errorMsg.append("\n\nAlternative routes available:\n");
+                for (Edge alt : alternatives) {
+                    errorMsg.append(String.format("\n%s → %s (Cost: %.0f T, Time: %.1f h)", 
+                        alt.getSource().getName(), 
+                        alt.getDestination().getName(),
+                        alt.getCost(),
+                        alt.getTravelTime()));
                 }
             }
-            JOptionPane.showMessageDialog(this, message);
+            
+            JOptionPane.showMessageDialog(this, errorMsg.toString(), "Reservation Failed", JOptionPane.ERROR_MESSAGE);
         }
     }
 
