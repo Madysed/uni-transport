@@ -4,6 +4,7 @@ import models.Edge;
 import models.Node;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static algorithms.Bfs.bfs;
 import static utils.EdgeUtils.*;
@@ -18,45 +19,63 @@ public class SD2 {
      */
     public static List<Edge> findSD2Edges(List<Edge> mstEdges, List<Node> originalNodes) {
         List<Edge> sd2Edges = new ArrayList<>();
+        if (mstEdges.isEmpty()) {
+            System.out.println("No MST edges provided. Cannot compute SD2 edges.");
+            return sd2Edges;
+        }
 
         // Build adjacency matrix from MST edges
         Map<Node, Map<Node, Double>> mstGraph = buildGraphFromEdges(mstEdges);
+        System.out.println("MST Graph: " + mstEdges.size() + " edges");
+        for (Edge edge : mstEdges) {
+            System.out.println("  MST Edge: " + edge.getSource().getName() + " -> " +
+                    edge.getDestination().getName() + " (Weight: " + edge.getWeight() + ")");
+        }
 
         // Find all original edges for potential additions
         List<Edge> allOriginalEdges = getAllOriginalEdges(originalNodes);
         System.out.println("All original edges: " + allOriginalEdges.size());
         for (Edge edge : allOriginalEdges) {
-            System.out.println("Edge: " + edge.getSource().getName() + " -> " + edge.getDestination().getName() + " (Weight: " + edge.getWeight() + ")");
+            System.out.println("Edge: " + edge.getSource().getName() + " -> " +
+                    edge.getDestination().getName() + " (Weight: " + edge.getWeight() + ")");
         }
 
         // Find nodes that violate diameter-2 property
         Map<Node, List<Node>> violatingNodes = satisfiesDiameter2(originalNodes, mstGraph);
+        System.out.println("Initial violating nodes count: " + violatingNodes.size());
+        for (Map.Entry<Node, List<Node>> entry : violatingNodes.entrySet()) {
+            System.out.println("  " + entry.getKey().getName() + " violates diameter-2 with: " +
+                    entry.getValue().stream().map(Node::getName).collect(Collectors.joining(", ")));
+        }
 
         int maxIterations = originalNodes.size() * originalNodes.size();
         int iteration = 0;
 
         while (!violatingNodes.isEmpty() && iteration < maxIterations) {
             iteration++;
+            System.out.println("Iteration " + iteration + ": Violating nodes = " + violatingNodes.size());
 
             // Get first violating node pair
             Node sourceNode = violatingNodes.keySet().iterator().next();
             Node targetNode = violatingNodes.get(sourceNode).get(0);
+            System.out.println("Processing violation: " + sourceNode.getName() + " -> " + targetNode.getName());
 
             // Find best edge to connect these nodes
             Edge bestEdge = findBestEdgeForConnection(sourceNode, targetNode, allOriginalEdges, mstEdges, sd2Edges);
 
             if (bestEdge != null) {
                 sd2Edges.add(bestEdge);
-
-                // Update the graph with new edge
-                mstGraph.get(bestEdge.getSource()).put(bestEdge.getDestination(), bestEdge.getWeight());
-                mstGraph.get(bestEdge.getDestination()).put(bestEdge.getSource(), bestEdge.getWeight());
-
                 System.out.println("Added SD2 edge: " + bestEdge.getSource().getName() +
                         " -> " + bestEdge.getDestination().getName() +
                         " (weight: " + bestEdge.getWeight() + ")");
+
+                // Update the graph with new edge
+                mstGraph.computeIfAbsent(bestEdge.getSource(), k -> new HashMap<>())
+                        .put(bestEdge.getDestination(), bestEdge.getWeight());
+                mstGraph.computeIfAbsent(bestEdge.getDestination(), k -> new HashMap<>())
+                        .put(bestEdge.getSource(), bestEdge.getWeight());
             } else {
-                // No suitable edge found, remove this violation from consideration
+                System.out.println("No suitable edge found for " + sourceNode.getName() + " -> " + targetNode.getName());
                 violatingNodes.get(sourceNode).remove(targetNode);
                 if (violatingNodes.get(sourceNode).isEmpty()) {
                     violatingNodes.remove(sourceNode);
@@ -67,6 +86,7 @@ public class SD2 {
             violatingNodes = satisfiesDiameter2(originalNodes, mstGraph);
         }
 
+        System.out.println("Final SD2 edges: " + sd2Edges.size());
         return sd2Edges;
     }
 
@@ -104,20 +124,38 @@ public class SD2 {
         Edge bestEdge = null;
         double bestWeight = Double.MAX_VALUE;
 
+        // Try direct edges first
         for (Edge edge : allOriginalEdges) {
-            // Check if edge connects source and target
             boolean connectsNodes = (edge.getSource().equals(source) && edge.getDestination().equals(target)) ||
                     (edge.getSource().equals(target) && edge.getDestination().equals(source));
+            if (connectsNodes && !isEdgeInList(mstEdges, edge) && !isEdgeInList(sd2Edges, edge)) {
+                if (edge.getWeight() < bestWeight) {
+                    bestEdge = edge;
+                    bestWeight = edge.getWeight();
+                }
+            }
+        }
 
-            if (connectsNodes) {
-                // Check if edge is not already in MST or SD2 edges
+        // If no direct edge, select the lowest-weight edge that reduces distance
+        if (bestEdge == null) {
+            for (Edge edge : allOriginalEdges) {
                 if (!isEdgeInList(mstEdges, edge) && !isEdgeInList(sd2Edges, edge)) {
-                    if (edge.getWeight() < bestWeight) {
+                    // Check if edge connects to source or target
+                    boolean connectsToSource = edge.getSource().equals(source) || edge.getDestination().equals(source);
+                    boolean connectsToTarget = edge.getSource().equals(target) || edge.getDestination().equals(target);
+                    if ((connectsToSource || connectsToTarget) && edge.getWeight() < bestWeight) {
                         bestEdge = edge;
                         bestWeight = edge.getWeight();
                     }
                 }
             }
+        }
+
+        if (bestEdge != null) {
+            System.out.println("Selected best edge: " + bestEdge.getSource().getName() + " -> " +
+                    bestEdge.getDestination().getName() + " (Weight: " + bestEdge.getWeight() + ")");
+        } else {
+            System.out.println("No suitable edge found for " + source.getName() + " -> " + target.getName());
         }
 
         return bestEdge;
