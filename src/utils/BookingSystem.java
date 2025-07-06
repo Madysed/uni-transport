@@ -224,24 +224,15 @@ public class BookingSystem {
     private String getRouteKey(Edge route) {
         return route.getSource().getName() + "->" + route.getDestination().getName();
     }
-    
+
     // Reservation result class
-    public static class ReservationResult {
-        private final boolean success;
-        private final String message;
-        private final Reservation reservation;
-        private final List<Edge> alternativeRoutes;
-        
-        public ReservationResult(boolean success, String message, Reservation reservation, List<Edge> alternativeRoutes) {
-            this.success = success;
-            this.message = message;
-            this.reservation = reservation;
-            this.alternativeRoutes = alternativeRoutes != null ? alternativeRoutes : new ArrayList<>();
+        public record ReservationResult(boolean success, String message, Reservation reservation,
+                                        List<Edge> alternativeRoutes) {
+            public ReservationResult(boolean success, String message, Reservation reservation, List<Edge> alternativeRoutes) {
+                this.success = success;
+                this.message = message;
+                this.reservation = reservation;
+                this.alternativeRoutes = alternativeRoutes != null ? alternativeRoutes : new ArrayList<>();
+            }
         }
-        
-        public boolean isSuccess() { return success; }
-        public String getMessage() { return message; }
-        public Reservation getReservation() { return reservation; }
-        public List<Edge> getAlternativeRoutes() { return alternativeRoutes; }
-    }
 } 

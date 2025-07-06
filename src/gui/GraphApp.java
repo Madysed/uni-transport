@@ -1107,7 +1107,7 @@ public class GraphApp extends JFrame {
         BookingSystem.ReservationResult result = bookingSystem.makePathReservation(
             student, selectedPath.getUsedEdges(), LocalDateTime.now().plusHours(1));
 
-        if (result.isSuccess()) {
+        if (result.success()) {
             updateReservationList();
 
             // Highlight the complete path
@@ -1115,7 +1115,7 @@ public class GraphApp extends JFrame {
 
             String message = String.format(
                 "Reservation successful!\n\nReservation ID: %s\n\nSelected Path:\n%s\n\nDetailed Information:\n%s",
-                result.getReservation().getReservationId(),
+                result.reservation().getReservationId(),
                 selectedPath.getPathSummary(),
                 SmartDijkstra.getDetailedPathInfo(selectedPath)
             );
@@ -1132,8 +1132,8 @@ public class GraphApp extends JFrame {
 
         } else {
             // Show error with alternative routes if available
-            StringBuilder errorMsg = new StringBuilder(result.getMessage());
-            List<Edge> alternatives = result.getAlternativeRoutes();
+            StringBuilder errorMsg = new StringBuilder(result.message());
+            List<Edge> alternatives = result.alternativeRoutes();
             
             if (alternatives != null && !alternatives.isEmpty()) {
                 errorMsg.append("\n\nAlternative routes available:\n");
