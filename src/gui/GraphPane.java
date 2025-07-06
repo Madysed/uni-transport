@@ -269,6 +269,8 @@ public class GraphPane extends JPanel {
                 animationStep++;
             } else if (("DIJKSTRA".equals(animationType) || "TSP".equals(animationType)) && animationStep < animationNodes.size()) {
                 animationStep++;
+            }else if("MSTSD2".equals(animationType) && animationStep < animationEdges.size()){
+                animationStep++;
             }
             repaint();
         }

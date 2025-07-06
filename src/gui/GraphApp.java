@@ -57,9 +57,6 @@ public class GraphApp extends JFrame {
         layoutComponents();
         setupListeners();
 
-        // Graphics formed based on user data
-        loadGraphFromFiles();
-
         // Set WindowListener to clear instance
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -118,7 +115,8 @@ public class GraphApp extends JFrame {
         algorithmCombo = new JComboBox<>(new String[]{
             "Minimum Spanning Tree (MST)",
             "Shortest Path (Dijkstra)",
-            "Traveling Salesman Problem (TSP)"
+            "Traveling Salesman Problem (TSP)",
+                "MST with SD2",
         });
 
         startNodeCombo = new JComboBox<>();
@@ -388,30 +386,6 @@ public class GraphApp extends JFrame {
         });
     }
 
-    // حذف شده: کاربر باید همه داده‌ها را خودش وارد کند
-
-    private void loadGraphFromFiles() {
-        // بارگذاری داده‌ها از فایل واحد (فقط نودهای متصل)
-        List<Node> nodes = InputHandler.loadDataFromFile("transport_data.txt");
-        if (!nodes.isEmpty()) {
-            // پاک کردن گراف قبلی
-            graphPane.clearNodes();
-
-            // اضافه کردن نودها
-            for (Node node : nodes) {
-                graphPane.addNodeDirectly(node);
-            }
-
-            // چیدمان نودها
-            graphPane.arrangeNodes();
-
-            updateNodeCombos();
-            updateStatus("Ready - " + nodes.size() + " universities loaded from file");
-        } else {
-            updateStatus("No universities found. Please add universities first.");
-        }
-    }
-
     private void updateNodeCombos() {
         startNodeCombo.removeAllItems();
         endNodeCombo.removeAllItems();
@@ -462,6 +436,39 @@ public class GraphApp extends JFrame {
 
     private void runMSTAlgorithm() {
         updateStatus("Running Minimum Spanning Tree algorithm...");
+        List<Edge> mstEdges = Kruskal.findMST(graphPane.getNodes());
+        List<Edge> sD2Edges = SD2.findSD2Edges(mstEdges, graphPane.getNodes());
+        double totalCost = Kruskal.calculateMSTCost(mstEdges);
+
+        // Start step-by-step animation
+        graphPane.startAnimation(mstEdges, new ArrayList<>(), "MST");
+        updateStatus("Starting MST animation - watching edges being added...");
+
+        // Set timer for animation
+        if (animationTimer != null) {
+            animationTimer.stop();
+        }
+
+        final int[] stepCount = {0};
+        animationTimer = new javax.swing.Timer(speedSlider.getValue(), new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (graphPane.isAnimationComplete()) {
+                    graphPane.setHighlightedEdges(mstEdges);
+                    updateStatus("MST completed. Total cost: " + String.format("%.2f", totalCost) + " km");
+                    finishAnimation();
+                } else {
+                    stepCount[0]++;
+                    updateStatus("MST Step " + stepCount[0] + " - Adding edge to spanning tree...");
+                    graphPane.nextAnimationStep();
+                }
+            }
+        });
+
+        animationTimer.start();
+    }
+    private void runMSTsndSD2Algorithm() {
+        updateStatus("Running Minimum Spanning Tree algorithm with SD2...");
         List<Edge> mstEdges = Kruskal.findMST(graphPane.getNodes());
         List<Edge> sD2Edges = SD2.findSD2Edges(mstEdges, graphPane.getNodes());
         double totalCost = Kruskal.calculateMSTCost(mstEdges);
@@ -1535,7 +1542,7 @@ public class GraphApp extends JFrame {
         }
 
         JList<JCheckBox> checkBoxList = new JList<>(listModel);
-        checkBoxList.setCellRenderer(new CheckBoxListCellRenderer());
+        checkBoxList.setCellRenderer(new GuiHelper.CheckBoxListCellRenderer());
         checkBoxList.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -1626,29 +1633,5 @@ public class GraphApp extends JFrame {
         scrollPane.setPreferredSize(new Dimension(500, 300));
 
         JOptionPane.showMessageDialog(this, scrollPane, "Cost Matrix", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    // Helper class for displaying checkbox in list
-    private static class CheckBoxListCellRenderer extends JCheckBox implements ListCellRenderer<JCheckBox> {
-        @Override
-        public java.awt.Component getListCellRendererComponent(JList<? extends JCheckBox> list, JCheckBox value,
-                                                             int index, boolean isSelected, boolean cellHasFocus) {
-            setEnabled(list.isEnabled());
-            setSelected(value.isSelected());
-            setFont(list.getFont());
-            setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
-            setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
-            setText(value.getText());
-            return this;
-        }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new GraphApp().setVisible(true);
-            }
-        });
     }
 }
