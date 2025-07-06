@@ -644,12 +644,6 @@ public class GraphApp extends JFrame {
         }
     }
 
-    private double calculateDistance(Node a, Node b) {
-        double dx = a.getX() - b.getX();
-        double dy = a.getY() - b.getY();
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
     private void pauseAlgorithm() {
         if (animationTimer != null && animationTimer.isRunning()) {
             animationTimer.stop();
@@ -678,21 +672,6 @@ public class GraphApp extends JFrame {
         isAnimating = false;
         startButton.setEnabled(true);
         pauseButton.setEnabled(false);
-    }
-
-    private Node findNodeByName(String displayName) {
-        // Remove "..." if present
-        if (displayName.endsWith("...")) {
-            displayName = displayName.substring(0, displayName.length() - 3);
-        }
-        
-        // Find node that starts with this name
-        for (Node node : graphPane.getNodes()) {
-            if (node.getName().startsWith(displayName)) {
-                return node;
-            }
-        }
-        return null;
     }
 
     private String getPathString(List<Node> path) {
