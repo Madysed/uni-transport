@@ -416,7 +416,7 @@ public class GraphApp extends JFrame {
         startNodeCombo.removeAllItems();
         endNodeCombo.removeAllItems();
         for (Node node : graphPane.getNodes()) {
-            String displayName = node.getName().length() > 20 ? node.getName().substring(0, 17) + "..." : node.getName();
+            String displayName = node.getName().length() > 17 ? node.getName().substring(0, 14) + "..." : node.getName();
             startNodeCombo.addItem(displayName);
             endNodeCombo.addItem(displayName);
         }
