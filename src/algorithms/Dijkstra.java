@@ -2,11 +2,24 @@ package algorithms;
 
 import models.Edge;
 import models.Node;
-
 import java.util.*;
 
+/**
+ * Implementation of Dijkstra's algorithm for shortest path calculations in weighted graphs.
+ */
 public class Dijkstra {
-    
+
+    /**
+     * Finds the shortest path between a start node and an end node using Dijkstra's algorithm.
+     *
+     * @param nodes List of all nodes in the graph
+     * @param start The starting node
+     * @param end The target end node
+     * @return A list of nodes representing the shortest path from start to end; empty if no path exists
+     *
+     * @timeComplexity O((V + E) * log V) using a priority queue
+     * @spaceComplexity O(V) for node metadata and priority queue
+     */
     public static List<Node> findShortestPath(List<Node> nodes, Node start, Node end) {
         // Initial setup
         for (Node node : nodes) {
@@ -63,7 +76,17 @@ public class Dijkstra {
         
         return path;
     }
-    
+
+    /**
+     * Computes the shortest distances from a start node to all other nodes using Dijkstra's algorithm.
+     *
+     * @param nodes List of all nodes in the graph
+     * @param start The starting node
+     * @return A map of each node to its shortest distance from the start node
+     *
+     * @timeComplexity O((V + E) * log V) using a priority queue
+     * @spaceComplexity O(V) for distance map and metadata
+     */
     public static Map<Node, Double> findAllDistances(List<Node> nodes, Node start) {
         Map<Node, Double> distances = new HashMap<>();
         

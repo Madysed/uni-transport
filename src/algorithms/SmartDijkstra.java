@@ -7,8 +7,15 @@ import utils.BookingSystem;
 
 import java.util.*;
 
+/**
+ * Implements a modified Dijkstra algorithm optimized for student pathfinding with constraints
+ * such as budget, edge capacity, and multi-objective optimization (cost, time, distance).
+ */
 public class SmartDijkstra {
-    
+
+    /**
+     * Encapsulates the result of a pathfinding operation.
+     */
     public static class PathResult {
         private List<Node> path;
         private double totalCost;
@@ -70,8 +77,10 @@ public class SmartDijkstra {
                                sb.toString(), totalCost, totalTime, totalDistance);
         }
     }
-    
-    // Different weights for combining criteria
+
+    /**
+     * Encapsulates weighting parameters for cost, time, and distance.
+     */
     public static class OptimizationWeights {
         public double costWeight = 0.4;     // 40% importance of cost
         public double timeWeight = 0.4;     // 40% importance of time
@@ -86,12 +95,27 @@ public class SmartDijkstra {
             this.distanceWeight = distanceWeight;
         }
     }
-    
+    /**
+     * Finds the optimal path using a multi-objective Dijkstra algorithm.
+     *
+     * @param nodes List of all nodes in the graph
+     * @param start Start node
+     * @param destination Destination node
+     * @param student Student with budget constraint
+     * @param weights Optimization weights
+     * @return PathResult containing route and summary information
+     *
+     * @timeComplexity O((V + E) log V)
+     * @spaceComplexity O(V + E)
+     */
     public static PathResult findOptimalPath(List<Node> nodes, Node start, Node destination, 
                                            Student student, OptimizationWeights weights) {
         return findOptimalPath(nodes, start, destination, student, weights, null);
     }
-    
+
+    /**
+     * Same as findOptimalPath but with animation sequence tracking.
+     */
     public static PathResult findOptimalPath(List<Node> nodes, Node start, Node destination, 
                                            Student student, OptimizationWeights weights, 
                                            List<Node> animationCallback) {
@@ -249,8 +273,20 @@ public class SmartDijkstra {
         
         return result;
     }
-    
-    // Generate alternative paths
+
+    /**
+     * Finds alternative optimized paths based on different optimization weights.
+     *
+     * @param nodes Graph nodes
+     * @param start Start node
+     * @param destination End node
+     * @param student Student with constraints
+     * @param maxAlternatives Max number of unique alternatives
+     * @return List of unique path alternatives
+     *
+     * @timeComplexity O(k(V + E) log V) where k is number of optimization profiles
+     * @spaceComplexity O(kV + E)
+     */
     public static List<PathResult> findAlternativePaths(List<Node> nodes, Node start, Node destination, 
                                                        Student student, int maxAlternatives) {
         
@@ -300,8 +336,13 @@ public class SmartDijkstra {
         
         return uniquePaths;
     }
-    
-    // Helper function for displaying path details
+
+    /**
+     * Formats detailed path information for printing.
+     *
+     * @param pathResult PathResult object
+     * @return String summary
+     */
     public static String getDetailedPathInfo(PathResult pathResult) {
         if (!pathResult.isSuccessful()) {
             return "Path calculation failed: " + pathResult.getFailureReason();

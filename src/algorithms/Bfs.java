@@ -5,8 +5,21 @@ import models.Edge;
 import models.Node;
 import java.util.*;
 
+/**
+ * Utility class for performing Breadth-First Search (BFS) and connectivity checks on graphs.
+ */
 public class Bfs {
 
+    /**
+     * Performs BFS from a starting node over an adjacency list and returns distances.
+     *
+     * @param start The starting node for the BFS
+     * @param graph The adjacency list representing the graph
+     * @return A map of nodes to their distance (in hops) from the start node
+     *
+     * @timeComplexity O(V + E) where V is the number of vertices and E is the number of edges
+     * @spaceComplexity O(V) for the distance map and queue
+     */
     public static Map<Node, Integer> bfs(Node start, Map<Node, Map<Node, Double>> graph) {
         Map<Node, Integer> dist = new HashMap<>();
         Queue<Node> queue = new LinkedList<>();
@@ -27,7 +40,17 @@ public class Bfs {
         }
         return dist;
     }
-    
+
+    /**
+     * Checks if the entire graph represented by the list of nodes is connected.
+     * Assumes edges are bidirectional.
+     *
+     * @param nodes List of all nodes in the graph
+     * @return True if all nodes are reachable from any starting node, false otherwise
+     *
+     * @timeComplexity O(V + E)
+     * @spaceComplexity O(V) for the visited set and queue
+     */
     public static boolean isConnected(List<Node> nodes) {
         if (nodes.isEmpty()) return true;
         
@@ -51,7 +74,16 @@ public class Bfs {
         
         return visited.size() == nodes.size();
     }
-    
+    /**
+     * Finds all connected components in the graph using BFS.
+     * Each component is returned as a list of nodes.
+     *
+     * @param nodes The list of all nodes in the graph
+     * @return A list of components where each component is a list of nodes
+     *
+     * @timeComplexity O(V + E)
+     * @spaceComplexity O(V + C) where C is the number of connected components
+     */
     public static List<List<Node>> findConnectedComponents(List<Node> nodes) {
         List<List<Node>> components = new ArrayList<>();
         Set<Node> visited = new HashSet<>();

@@ -6,6 +6,14 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * BookingSystem is a singleton class that manages student reservations for transportation routes.
+ * It handles capacity checks, reservation creation, cancellation, confirmation, and reporting.
+ *
+ * @timeComplexity Most operations are linear or constant time depending on the list/map sizes.
+ * @spaceComplexity O(s + r + e) where s is the number of students, r is reservations, and e is active route keys.
+ */
+
 public class BookingSystem {
     private final List<Reservation> reservations;
     private final List<Student> students;
@@ -50,8 +58,19 @@ public class BookingSystem {
             .findFirst()
             .orElse(null);
     }
-    
-    // Path Reservation management
+
+    /**
+     * Makes a reservation for a given path and travel time.
+     *
+     * @param student The student making the reservation
+     * @param pathEdges The list of route edges forming the path
+     * @param travelTime The time of travel
+     * @return ReservationResult containing success status, messages, reservation or alternatives
+     *
+     * @timeComplexity O(e) where e is the number of edges in the path (typically small)
+     * @spaceComplexity O(1)
+     */
+
     public ReservationResult makePathReservation(Student student, List<Edge> pathEdges, LocalDateTime travelTime) {
         return makePathReservation(student, pathEdges, travelTime, 1);
     }
@@ -100,7 +119,17 @@ public class BookingSystem {
     public ReservationResult makeReservation(Student student, Edge route, LocalDateTime travelTime, int seatsRequested) {
         return makePathReservation(student, Collections.singletonList(route), travelTime, seatsRequested);
     }
-    
+
+    /**
+     * Cancels a reservation by its ID if it is cancellable.
+     *
+     * @param reservationId The ID of the reservation
+     * @return True if cancellation was successful
+     *
+     * @timeComplexity O(r + e) where r is the number of reservations, e is path length
+     * @spaceComplexity O(1)
+     */
+
     public boolean cancelReservation(String reservationId) {
         Optional<Reservation> reservationOpt = reservations.stream()
             .filter(r -> r.getReservationId().equals(reservationId))
@@ -123,7 +152,17 @@ public class BookingSystem {
         }
         return false;
     }
-    
+
+    /**
+     * Confirms a reservation by its ID if it's pending.
+     *
+     * @param reservationId The ID of the reservation
+     * @return True if confirmation was successful
+     *
+     * @timeComplexity O(r) where r is the number of reservations
+     * @spaceComplexity O(1)
+     */
+
     public boolean confirmReservation(String reservationId) {
         Optional<Reservation> reservationOpt = reservations.stream()
             .filter(r -> r.getReservationId().equals(reservationId))
@@ -157,8 +196,17 @@ public class BookingSystem {
         int currentUsage = routeCapacityUsage.getOrDefault(routeKey, 0);
         return route.getCapacity() > 0 ? (double) currentUsage / route.getCapacity() * 100 : 0;
     }
-    
-    // Find alternative routes
+
+    /**
+     * Finds alternative available routes from the same source as the given route.
+     *
+     * @param originalRoute The original route
+     * @return List of alternative routes sorted by cost
+     *
+     * @timeComplexity O(d log d) where d is the number of edges from the source node
+     * @spaceComplexity O(d)
+     */
+
     public List<Edge> findAlternativeRoutes(Edge originalRoute) {
         // Find routes starting from same source
         List<Edge> alternatives = new ArrayList<>();
@@ -175,7 +223,18 @@ public class BookingSystem {
         
         return alternatives;
     }
-    
+
+    /**
+     * Finds cheaper available routes within the student's budget from the same source.
+     *
+     * @param originalRoute The original route
+     * @param maxBudget The student's max budget
+     * @return List of budget-friendly alternatives
+     *
+     * @timeComplexity O(d log d) where d is the number of edges from the source node
+     * @spaceComplexity O(d)
+     */
+
     public List<Edge> findCheaperRoutes(Edge originalRoute, double maxBudget) {
         List<Edge> cheaper = new ArrayList<>();
         

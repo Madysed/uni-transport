@@ -3,11 +3,22 @@ package algorithms;
 import models.Edge;
 import models.Node;
 import java.util.*;
-
 import static utils.EdgeUtils.createEdgeKey;
 
+/**
+ * Implements Kruskal's algorithm to compute the Minimum Spanning Tree (MST) of a graph.
+ */
 public class Kruskal {
-    
+
+    /**
+     * Finds the Minimum Spanning Tree (MST) of the given graph using Kruskal's algorithm.
+     *
+     * @param nodes List of all nodes in the graph
+     * @return List of edges that form the MST
+     *
+     * @timeComplexity O(E log E + Eα(V)) where E is number of edges, V is number of vertices, α is inverse Ackermann
+     * @spaceComplexity O(E + V) for edge list and Union-Find structure
+     */
     public static List<Edge> findMST(List<Node> nodes) {
         List<Edge> allEdges = new ArrayList<>();
         List<Edge> mstEdges = new ArrayList<>();
@@ -59,7 +70,15 @@ public class Kruskal {
         return mstEdges;
     }
 
-    
+    /**
+     * Calculates the total weight of the edges in the MST.
+     *
+     * @param mstEdges List of edges in the MST
+     * @return Total weight (cost) of the MST
+     *
+     * @timeComplexity O(E) where E is the number of MST edges
+     * @spaceComplexity O(1)
+     */
     public static double calculateMSTCost(List<Edge> mstEdges) {
         double totalCost = 0;
         for (Edge edge : mstEdges) {

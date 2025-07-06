@@ -48,8 +48,19 @@ public class TSP {
     private static double[][] costMatrix;
     private static double[][] timeMatrix;
     private static List<Node> nodeList;
-    
-    // TSP with Bitmasking and Dynamic Programming (simple and efficient)
+
+    /**
+     * Solves the Traveling Salesman Problem (TSP) using Dynamic Programming with Bitmasking.
+     * Returns to the starting university after visiting all others with the minimum cost.
+     *
+     * @param universities List of university nodes to visit
+     * @param startUniversity The starting university node
+     * @return A TSPResult object containing the path, total cost, time, and route details
+     *
+     * @timeComplexity O(n^2 * 2^n) where n is the number of universities (limited to 10)
+     * @spaceComplexity O(n * 2^n) for the DP and parent arrays
+     */
+
     public static TSPResult solveTSPWithBitmasking(List<Node> universities, Node startUniversity) {
         if (universities.size() <= 1) {
             return new TSPResult(universities, 0, 0);
@@ -225,8 +236,20 @@ public class TSP {
         double dy = a.getY() - b.getY();
         return Math.sqrt(dx * dx + dy * dy);
     }
-    
-    // Simple TSP with Nearest Neighbor (for comparison)
+
+    /**
+     * Solves the Traveling Salesman Problem (TSP) using the Nearest Neighbor heuristic.
+     * Starts at the given university and iteratively visits the nearest unvisited node,
+     * then returns to the starting point.
+     *
+     * @param universities List of university nodes to visit
+     * @param startUniversity The starting university node
+     * @return A TSPResult object containing the path, total cost, time, and route details
+     *
+     * @timeComplexity O(n^2) where n is the number of universities
+     * @spaceComplexity O(n) for the visited set and path list
+     */
+
     public static TSPResult solveTSPSimple(List<Node> universities, Node startUniversity) {
         if (universities.size() <= 1) {
             return new TSPResult(universities, 0, 0);
