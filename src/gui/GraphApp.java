@@ -269,8 +269,12 @@ public class GraphApp extends JFrame {
         // Top panel with vertical layout
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.add(controlPanel);
-        topPanel.add(speedPanel);
+//        topPanel.add(controlPanel);
+//        topPanel.add(speedPanel);
+        JPanel topControlsContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        topControlsContainer.add(controlPanel);
+        topControlsContainer.add(speedPanel);
+        topPanel.add(topControlsContainer);
         topPanel.add(actionButtonsPanel);  // Action buttons added below speed panel
 
         // Status panel
