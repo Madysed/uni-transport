@@ -3,8 +3,6 @@ package algorithms;
 import models.Color;
 import models.Edge;
 import models.Node;
-
-
 import java.util.*;
 
 public class Bfs {
@@ -84,50 +82,5 @@ public class Bfs {
         }
         
         return components;
-    }
-    
-    public static void colorGraph(List<Node> nodes) {
-        // Graph coloring using BFS
-        for (Node node : nodes) {
-            node.setColor(Color.WHITE);
-        }
-        
-        Color[] colors = {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.PURPLE, Color.ORANGE};
-        
-        for (Node node : nodes) {
-            if (node.getColor() == Color.WHITE) {
-                Queue<Node> queue = new LinkedList<>();
-                queue.offer(node);
-                node.setColor(Color.GRAY);
-                
-                while (!queue.isEmpty()) {
-                    Node current = queue.poll();
-                    
-                    // Find the first suitable color
-                    for (Color color : colors) {
-                        boolean canUse = true;
-                        for (Edge edge : current.getEdges()) {
-                            if (edge.getDestination().getColor() == color) {
-                                canUse = false;
-                                break;
-                            }
-                        }
-                        if (canUse) {
-                            current.setColor(color);
-                            break;
-                        }
-                    }
-                    
-                    // Add neighbors to queue
-                    for (Edge edge : current.getEdges()) {
-                        Node neighbor = edge.getDestination();
-                        if (neighbor.getColor() == Color.WHITE) {
-                            neighbor.setColor(Color.GRAY);
-                            queue.offer(neighbor);
-                        }
-                    }
-                }
-            }
-        }
     }
 } 
