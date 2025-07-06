@@ -24,8 +24,8 @@ public class GraphApp extends JFrame {
     private JSlider speedSlider;
     private JTextArea statusArea;
     private JComboBox<String> algorithmCombo;
-    private JComboBox<String> startNodeCombo;
-    private JComboBox<String> endNodeCombo;
+    private JComboBox<Node> startNodeCombo;
+    private JComboBox<Node> endNodeCombo;
     private javax.swing.Timer animationTimer;
     private int animationStep = 0;
     private boolean isAnimating = false;
@@ -101,7 +101,7 @@ public class GraphApp extends JFrame {
             "(MST)",
             "(Dijkstra)",
             "(TSP)",
-                "(MST+SD2)",
+            "(MST+SD2)",
         });
 
         startNodeCombo = new JComboBox<>();
@@ -366,31 +366,50 @@ public class GraphApp extends JFrame {
     private void updateNodeCombos() {
         startNodeCombo.removeAllItems();
         endNodeCombo.removeAllItems();
+        
+        // Set custom renderer for combo boxes
+        ComboBoxRenderer renderer = new ComboBoxRenderer();
+        startNodeCombo.setRenderer(renderer);
+        endNodeCombo.setRenderer(renderer);
+        
         for (Node node : graphPane.getNodes()) {
-            String displayName = node.getName().length() > 10 ? node.getName().substring(0,7) + "..." : node.getName();
-            startNodeCombo.addItem(displayName);
-            endNodeCombo.addItem(displayName);
+            startNodeCombo.addItem(node);
+            endNodeCombo.addItem(node);
         }
+        
         String selectedAlgorithm = (String) algorithmCombo.getSelectedItem();
         assert selectedAlgorithm != null;
-        boolean needsEndNode = selectedAlgorithm.contains("Shortest Path");
+        boolean needsEndNode = selectedAlgorithm.contains("Dijkstra");
         endNodeCombo.setEnabled(needsEndNode);
+    }
+
+    // Custom renderer for Node objects in combo boxes
+    private static class ComboBoxRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, 
+                int index, boolean isSelected, boolean cellHasFocus) {
+            if (value instanceof Node) {
+                Node node = (Node) value;
+                String displayName = node.getName().length() > 10 ? 
+                    node.getName().substring(0, 7) + "..." : 
+                    node.getName();
+                value = displayName;
+            }
+            return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        }
     }
 
     private void startAlgorithm() {
         if (isAnimating) return;
 
         String selectedAlgorithm = (String) algorithmCombo.getSelectedItem();
-        String startNodeName = (String) startNodeCombo.getSelectedItem();
-        String endNodeName = (String) endNodeCombo.getSelectedItem();
+        Node startNode = (Node) startNodeCombo.getSelectedItem();
+        Node endNode = (Node) endNodeCombo.getSelectedItem();
 
-        if (startNodeName == null) {
+        if (startNode == null) {
             updateStatus("Please select a start node.");
             return;
         }
-
-        Node startNode = findNodeByName(startNodeName);
-        Node endNode = findNodeByName(endNodeName);
 
         resetAlgorithm();
         isAnimating = true;
@@ -399,7 +418,7 @@ public class GraphApp extends JFrame {
 
         if (selectedAlgorithm.contains("MST")) {
             runMSTAlgorithm();
-        } else if (selectedAlgorithm.contains("Shortest Path")) {
+        } else if (selectedAlgorithm.contains("Dijkstra")) {
             if (endNode == null) {
                 updateStatus("Please select an end node for shortest path.");
                 finishAnimation();
@@ -657,9 +676,15 @@ public class GraphApp extends JFrame {
         pauseButton.setEnabled(false);
     }
 
-    private Node findNodeByName(String name) {
+    private Node findNodeByName(String displayName) {
+        // Remove "..." if present
+        if (displayName.endsWith("...")) {
+            displayName = displayName.substring(0, displayName.length() - 3);
+        }
+        
+        // Find node that starts with this name
         for (Node node : graphPane.getNodes()) {
-            if (node.getName().equals(name)) {
+            if (node.getName().startsWith(displayName)) {
                 return node;
             }
         }
@@ -815,30 +840,25 @@ public class GraphApp extends JFrame {
     private void updateActiveAnimation() {
         if (isAnimating) {
             String selectedAlgorithm = (String) algorithmCombo.getSelectedItem();
-            String startNodeName = (String) startNodeCombo.getSelectedItem();
-            String endNodeName = (String) endNodeCombo.getSelectedItem();
+            Node startNode = (Node) startNodeCombo.getSelectedItem();
+            Node endNode = (Node) endNodeCombo.getSelectedItem();
 
-            if (startNodeName != null) {
-                Node startNode = findNodeByName(startNodeName);
-                Node endNode = findNodeByName(endNodeName);
-
-                if (startNode != null) {
-                    // Stop current animation
-                    if (animationTimer != null && animationTimer.isRunning()) {
-                        animationTimer.stop();
-                    }
-
-                    // Recalculate and start new animation
-                    if (selectedAlgorithm.contains("MST")) {
-                        runMSTAlgorithm();
-                    } else if (selectedAlgorithm.contains("Shortest Path") && endNode != null) {
-                        runDijkstraAlgorithm(startNode, endNode);
-                    } else if (selectedAlgorithm.contains("TSP")) {
-                        runTSPAlgorithm(startNode);
-                    }
-
-                    updateStatus("Algorithm restarted with new route data...");
+            if (startNode != null) {
+                // Stop current animation
+                if (animationTimer != null && animationTimer.isRunning()) {
+                    animationTimer.stop();
                 }
+
+                // Recalculate and start new animation
+                if (selectedAlgorithm.contains("MST")) {
+                    runMSTAlgorithm();
+                } else if (selectedAlgorithm.contains("Dijkstra") && endNode != null) {
+                    runDijkstraAlgorithm(startNode, endNode);
+                } else if (selectedAlgorithm.contains("TSP")) {
+                    runTSPAlgorithm(startNode);
+                }
+
+                updateStatus("Algorithm restarted with new route data...");
             }
         } else {
             // If animation is not running, only update final result
@@ -849,47 +869,42 @@ public class GraphApp extends JFrame {
     // New method for updating results without animation
     private void updateStaticResults() {
         String selectedAlgorithm = (String) algorithmCombo.getSelectedItem();
-        String startNodeName = (String) startNodeCombo.getSelectedItem();
-        String endNodeName = (String) endNodeCombo.getSelectedItem();
+        Node startNode = (Node) startNodeCombo.getSelectedItem();
+        Node endNode = (Node) endNodeCombo.getSelectedItem();
 
-        if (startNodeName != null) {
-            Node startNode = findNodeByName(startNodeName);
-            Node endNode = findNodeByName(endNodeName);
+        if (startNode != null) {
+            if (selectedAlgorithm.contains("MST")) {
+                // Check graph connectivity before calculating MST
+                List<Node> nodes = graphPane.getNodes();
+                if (nodes.size() < 2) {
+                    updateStatus("MST: Need at least 2 nodes to compute MST");
+                    return;
+                }
 
-            if (startNode != null) {
-                if (selectedAlgorithm.contains("MST")) {
-                    // Check graph connectivity before calculating MST
-                    List<Node> nodes = graphPane.getNodes();
-                    if (nodes.size() < 2) {
-                        updateStatus("MST: Need at least 2 nodes to compute MST");
-                        return;
-                    }
+                List<Edge> mstEdges = Kruskal.findMST(nodes);
+                double totalCost = Kruskal.calculateMSTCost(mstEdges);
 
-                    List<Edge> mstEdges = Kruskal.findMST(nodes);
-                    double totalCost = Kruskal.calculateMSTCost(mstEdges);
-
-                    // Check if MST is completely calculated
-                    if (mstEdges.size() == nodes.size() - 1) {
-                        graphPane.setHighlightedEdges(mstEdges);
-                        updateStatus("MST updated with new data. Total cost: " + String.format("%.2f", totalCost) + " km - " + mstEdges.size() + " edges");
-                    } else {
-                        updateStatus("Warning: Graph is not fully connected. MST incomplete - only " + mstEdges.size() + " edges found");
-                        graphPane.setHighlightedEdges(mstEdges); // Display connected components
-                    }
-                } else if (selectedAlgorithm.contains("Shortest Path") && endNode != null) {
-                    List<Node> shortestPath = Dijkstra.findShortestPath(graphPane.getNodes(), startNode, endNode);
-                    if (!shortestPath.isEmpty()) {
-                        graphPane.setHighlightedPath(shortestPath);
-                        updateStatus("Shortest path updated: " + getPathString(shortestPath) +
-                                    " (Distance: " + String.format("%.2f", endNode.getDistance()) + " km)");
-                    }
-                } else if (selectedAlgorithm.contains("TSP")) {
-                    TSP.TSPResult result = TSP.solveTSPWithBitmasking(graphPane.getNodes(), startNode);
-                    if (!result.getPath().isEmpty()) {
-                        graphPane.setHighlightedPath(result.getPath());
-                        updateStatus("TSP tour updated: " + getPathString(result.getPath()) +
-                                    " (Total cost: " + String.format("%.2f", result.getTotalCost()) + " km)");
-                    }
+                // Check if MST is completely calculated
+                if (mstEdges.size() == nodes.size() - 1) {
+                    graphPane.setHighlightedEdges(mstEdges);
+                    updateStatus("MST updated with new data. Total cost: " + String.format("%.2f", totalCost) + " km - " + mstEdges.size() + " edges");
+                } else {
+                    updateStatus("Warning: Graph is not fully connected. MST incomplete - only " + mstEdges.size() + " edges found");
+                    graphPane.setHighlightedEdges(mstEdges); // Display connected components
+                }
+            } else if (selectedAlgorithm.contains("Dijkstra") && endNode != null) {
+                List<Node> shortestPath = Dijkstra.findShortestPath(graphPane.getNodes(), startNode, endNode);
+                if (!shortestPath.isEmpty()) {
+                    graphPane.setHighlightedPath(shortestPath);
+                    updateStatus("Shortest path updated: " + getPathString(shortestPath) +
+                                " (Distance: " + String.format("%.2f", endNode.getDistance()) + " km)");
+                }
+            } else if (selectedAlgorithm.contains("TSP")) {
+                TSP.TSPResult result = TSP.solveTSPWithBitmasking(graphPane.getNodes(), startNode);
+                if (!result.getPath().isEmpty()) {
+                    graphPane.setHighlightedPath(result.getPath());
+                    updateStatus("TSP tour updated: " + getPathString(result.getPath()) +
+                                " (Total cost: " + String.format("%.2f", result.getTotalCost()) + " km)");
                 }
             }
         }
