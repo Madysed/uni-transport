@@ -1,9 +1,6 @@
 package gui;
 
-import algorithms.Dijkstra;
-import algorithms.Kruskal;
-import algorithms.SmartDijkstra;
-import algorithms.TSP;
+import algorithms.*;
 import models.Edge;
 import models.Node;
 import models.Reservation;
@@ -466,6 +463,7 @@ public class GraphApp extends JFrame {
     private void runMSTAlgorithm() {
         updateStatus("Running Minimum Spanning Tree algorithm...");
         List<Edge> mstEdges = Kruskal.findMST(graphPane.getNodes());
+        List<Edge> sD2Edges = SD2.findSD2Edges(mstEdges, graphPane.getNodes());
         double totalCost = Kruskal.calculateMSTCost(mstEdges);
 
         // Start step-by-step animation

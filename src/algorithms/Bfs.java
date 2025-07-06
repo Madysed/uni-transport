@@ -19,9 +19,9 @@ public class Bfs {
             Node u = queue.poll();
             int d = dist.get(u);
             if (graph.containsKey(u)) {
-                for (Node v:graph.get(u).keySet()) {
+                for (Node v : graph.get(u).keySet()) {
                     if (!dist.containsKey(v)) {
-                        dist.put(v,d+1);
+                        dist.put(v, d + 1);
                         queue.add(v);
                     }
                 }

@@ -6,52 +6,117 @@ import models.Node;
 import java.util.*;
 
 import static algorithms.Bfs.bfs;
-import static utils.EdgeUtils.createEdgeKey;
+import static utils.EdgeUtils.*;
 
 public class SD2 {
 
-    public static List<Edge> findSD2Edges(List<Node> nodes,List<Edge> mstEdges) {
-        List<Edge> allEdges = new ArrayList<>();
-        List<Edge> sD2Edges = new ArrayList<>();
-        Set<String> addedEdges = new HashSet<>();
+    /**
+     * Finds additional edges needed to satisfy diameter-2 property
+     * @param mstEdges The MST edges from Kruskal's algorithm
+     * @param originalNodes The original nodes from the graph
+     * @return List of additional edges needed for diameter-2
+     */
+    public static List<Edge> findSD2Edges(List<Edge> mstEdges, List<Node> originalNodes) {
+        List<Edge> sd2Edges = new ArrayList<>();
 
-        // Collect all edges without duplicates
-        for (Node node : nodes) {
-            for (Edge edge : node.getEdges()) {
-                // Create unique key for edge (direction independent)
-                String edgeKey = createEdgeKey(edge.getSource(), edge.getDestination());
-                if (!addedEdges.contains(edgeKey)) {
-                    allEdges.add(edge);
-                    addedEdges.add(edgeKey);
+        // Build adjacency matrix from MST edges
+        Map<Node, Map<Node, Double>> mstGraph = buildGraphFromEdges(mstEdges);
+
+        // Find all original edges for potential additions
+        List<Edge> allOriginalEdges = getAllOriginalEdges(originalNodes);
+
+        // Find nodes that violate diameter-2 property
+        Map<Node, List<Node>> violatingNodes = satisfiesDiameter2(originalNodes, mstGraph);
+
+        int maxIterations = originalNodes.size() * originalNodes.size();
+        int iteration = 0;
+
+        while (!violatingNodes.isEmpty() && iteration < maxIterations) {
+            iteration++;
+
+            // Get first violating node pair
+            Node sourceNode = violatingNodes.keySet().iterator().next();
+            Node targetNode = violatingNodes.get(sourceNode).get(0);
+
+            // Find best edge to connect these nodes
+            Edge bestEdge = findBestEdgeForConnection(sourceNode, targetNode, allOriginalEdges, mstEdges, sd2Edges);
+
+            if (bestEdge != null) {
+                sd2Edges.add(bestEdge);
+
+                // Update the graph with new edge
+                mstGraph.get(bestEdge.getSource()).put(bestEdge.getDestination(), bestEdge.getWeight());
+                mstGraph.get(bestEdge.getDestination()).put(bestEdge.getSource(), bestEdge.getWeight());
+
+                System.out.println("Added SD2 edge: " + bestEdge.getSource().getName() +
+                        " -> " + bestEdge.getDestination().getName() +
+                        " (weight: " + bestEdge.getWeight() + ")");
+            } else {
+                // No suitable edge found, remove this violation from consideration
+                violatingNodes.get(sourceNode).remove(targetNode);
+                if (violatingNodes.get(sourceNode).isEmpty()) {
+                    violatingNodes.remove(sourceNode);
                 }
             }
+
+            // Recalculate violations
+            violatingNodes = satisfiesDiameter2(originalNodes, mstGraph);
         }
 
-        // Sort edges by weight
-        allEdges.sort(Comparator.comparingDouble(Edge::getWeight));
-        return sD2Edges;
+        return sd2Edges;
     }
 
+    /**
+     * Find nodes that don't satisfy diameter-2 property
+     */
+    public static Map<Node, List<Node>> satisfiesDiameter2(List<Node> nodes, Map<Node, Map<Node, Double>> graph) {
+        Map<Node, List<Node>> violatingNodes = new HashMap<>();
 
-    public static Map<Node, List<Node>> satisfiesDiameter2(List<Node> unis, Map<Node, Map<Node, Double>> graph) {
-//        List<Node> nD2Nodes = new ArrayList<>();
-        Map<Node, List<Node>> nD2Nodes = new HashMap<>();
-        for (Node u : unis) {
-            List<Node> tmp = new ArrayList<>();
-            Map<Node, Integer> dist = bfs(u, graph);
-            for (Node v : unis) {
+        for (Node u : nodes) {
+            List<Node> unreachableNodes = new ArrayList<>();
+            Map<Node, Integer> distances = bfs(u, graph);
 
-                if (!u.equals(v) && dist.getOrDefault(v, Integer.MAX_VALUE) > 2) {
-                    tmp.add(v);
-
+            for (Node v : nodes) {
+                if (!u.equals(v) && distances.getOrDefault(v, Integer.MAX_VALUE) > 2) {
+                    unreachableNodes.add(v);
                 }
             }
-            if (!tmp.isEmpty()) {
-                nD2Nodes.put(u, tmp);
-            }
 
+            if (!unreachableNodes.isEmpty()) {
+                violatingNodes.put(u, unreachableNodes);
+            }
         }
-        return nD2Nodes;
+
+        return violatingNodes;
+    }
+
+    /**
+     * Find the best edge to connect two nodes that violate diameter-2
+     */
+    private static Edge findBestEdgeForConnection(Node source, Node target,
+                                                  List<Edge> allOriginalEdges,
+                                                  List<Edge> mstEdges,
+                                                  List<Edge> sd2Edges) {
+        Edge bestEdge = null;
+        double bestWeight = Double.MAX_VALUE;
+
+        for (Edge edge : allOriginalEdges) {
+            // Check if edge connects source and target
+            boolean connectsNodes = (edge.getSource().equals(source) && edge.getDestination().equals(target)) ||
+                    (edge.getSource().equals(target) && edge.getDestination().equals(source));
+
+            if (connectsNodes) {
+                // Check if edge is not already in MST or SD2 edges
+                if (!isEdgeInList(mstEdges, edge) && !isEdgeInList(sd2Edges, edge)) {
+                    if (edge.getWeight() < bestWeight) {
+                        bestEdge = edge;
+                        bestWeight = edge.getWeight();
+                    }
+                }
+            }
+        }
+
+        return bestEdge;
     }
     
     // Floyd-Warshall algorithm for finding shortest paths between all pairs of nodes

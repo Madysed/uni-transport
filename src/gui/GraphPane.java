@@ -44,6 +44,7 @@ public class GraphPane extends JPanel {
     public GraphPane() {
         nodes = new ArrayList<>();
         highlightedEdges = new ArrayList<>();
+        highlightedEdgesYellow = new ArrayList<>();
         highlightedPath = new ArrayList<>();
         animationEdges = new ArrayList<>();
         animationNodes = new ArrayList<>();
@@ -208,15 +209,23 @@ public class GraphPane extends JPanel {
         this.highlightedPath.clear();
         repaint();
     }
+
+    public void setHighlightedEdgesYellow(List<Edge> edges) {
+        this.highlightedEdgesYellow = new ArrayList<>(edges);
+        this.highlightedPath.clear();
+        repaint();
+    }
     
     public void setHighlightedPath(List<Node> path) {
         this.highlightedPath = new ArrayList<>(path);
         this.highlightedEdges.clear();
+        this.highlightedEdgesYellow.clear();
         repaint();
     }
     
     public void clearHighlights() {
         highlightedEdges.clear();
+        highlightedEdgesYellow.clear();
         highlightedPath.clear();
         animationEdges.clear();
         animationNodes.clear();
@@ -391,6 +400,9 @@ public class GraphPane extends JPanel {
                 }
                 } else if (highlightedEdges.contains(edge)) {
                     g2d.setColor(HIGHLIGHTED_EDGE_COLOR);
+                    g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                }else if (highlightedEdgesYellow.contains(edge)) {
+                    g2d.setColor(HIGHLIGHTED_EDGE_COLOR_YELLOW);
                     g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                 } else {
                     g2d.setColor(EDGE_COLOR);
