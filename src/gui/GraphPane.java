@@ -428,22 +428,18 @@ public class GraphPane extends JPanel {
         // محاسبه نقطه میانی برای رسم اطلاعات یال
         int midX = (x1 + x2) / 2;
         int midY = (y1 + y2) / 2;
-        
-        // Determine edge color based on animation type
-        java.awt.Color edgeColor = EDGE_COLOR;
+
         boolean isHighlighted = false;
         
         // Special colors for Dijkstra animations
         if (showSmartDijkstraAnimation && smartDijkstraResult != null) {
             // Optimal path edges
             if (smartDijkstraResult.getUsedEdges().contains(edge)) {
-                edgeColor = SMART_DIJKSTRA_OPTIMAL_PATH_COLOR;
                 isHighlighted = true;
             } else if (smartDijkstraSequence != null && smartDijkstraStep > 0) {
                 // Edges being examined
                 Node currentNode = smartDijkstraSequence.get(Math.min(smartDijkstraStep, smartDijkstraSequence.size() - 1));
                 if (edge.getSource().equals(currentNode) || edge.getDestination().equals(currentNode)) {
-                    edgeColor = SMART_DIJKSTRA_PROCESSING_COLOR;
                     isHighlighted = true;
                 }
             }
@@ -452,13 +448,10 @@ public class GraphPane extends JPanel {
             if (animationStep > 0 && animationNodes.size() > animationStep) {
                 Node currentNode = animationNodes.get(animationStep);
                 if (edge.getSource().equals(currentNode) || edge.getDestination().equals(currentNode)) {
-                    edgeColor = DIJKSTRA_EXPLORING_COLOR;
                     isHighlighted = true;
                 }
             }
         }
-        
-        // Remove redrawing edge - already drawn in drawEdges
         
         // Display edge information
         Font originalFont = g2d.getFont();
