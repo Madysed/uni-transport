@@ -27,9 +27,7 @@ public class GraphApp extends JFrame {
     private JComboBox<Node> startNodeCombo;
     private JComboBox<Node> endNodeCombo;
     private javax.swing.Timer animationTimer;
-    private int animationStep = 0;
     private boolean isAnimating = false;
-    private InputHandler inputHandler;
     private static GraphApp instance; // For console access
 
     // Student management components
@@ -39,7 +37,7 @@ public class GraphApp extends JFrame {
     private JButton addStudentButton;
     private JButton viewReservationsButton;
     private JButton manageStudentsButton;
-    private BookingSystem bookingSystem;
+    private final BookingSystem bookingSystem;
 
     public GraphApp() {
         setTitle("Graph Visualizer - Transport System");
@@ -70,9 +68,7 @@ public class GraphApp extends JFrame {
     // Method for updating graph from console
     public static void updateFromConsole(List<Node> nodes) {
         if (instance != null) {
-            SwingUtilities.invokeLater(() -> {
-                instance.updateGraphFromConsole(nodes);
-            });
+            SwingUtilities.invokeLater(() -> instance.updateGraphFromConsole(nodes));
         }
     }
 
@@ -157,8 +153,8 @@ public class GraphApp extends JFrame {
         reservationPanel.add(reservationButtonPanel, BorderLayout.SOUTH);
 
         // Add listeners for reservation buttons
-        cancelReservationButton.addActionListener(e -> cancelSelectedReservation());
-        confirmReservationButton.addActionListener(e -> confirmSelectedReservation());
+        cancelReservationButton.addActionListener(_ -> cancelSelectedReservation());
+        confirmReservationButton.addActionListener(_ -> confirmSelectedReservation());
     }
 
     private void layoutComponents() {
@@ -205,7 +201,7 @@ public class GraphApp extends JFrame {
 
         // Add university button
         JButton addUniversityButton = new JButton("Add University");
-        addUniversityButton.addActionListener(e -> addNewUniversity());
+        addUniversityButton.addActionListener(_ -> addNewUniversity());
         addUniversityButton.setBackground(new java.awt.Color(46, 125, 50));
         addUniversityButton.setForeground(java.awt.Color.WHITE);
         addUniversityButton.setOpaque(true);
@@ -214,7 +210,7 @@ public class GraphApp extends JFrame {
 
         // Add route button
         JButton addRouteButton = new JButton("Add Route");
-        addRouteButton.addActionListener(e -> addNewRoute());
+        addRouteButton.addActionListener(_ -> addNewRoute());
         addRouteButton.setBackground(new java.awt.Color(2, 136, 209));
         addRouteButton.setForeground(java.awt.Color.WHITE);
         addRouteButton.setOpaque(true);
@@ -223,7 +219,7 @@ public class GraphApp extends JFrame {
 
         // Remove university button
         JButton removeUniversityButton = new JButton("Remove University");
-        removeUniversityButton.addActionListener(e -> removeUniversity());
+        removeUniversityButton.addActionListener(_ -> removeUniversity());
         removeUniversityButton.setBackground(new java.awt.Color(244, 67, 54));
         removeUniversityButton.setForeground(java.awt.Color.WHITE);
         removeUniversityButton.setOpaque(true);
@@ -232,7 +228,7 @@ public class GraphApp extends JFrame {
 
         // TSP buttons
         JButton planTourButton = new JButton("Plan University Tour");
-        planTourButton.addActionListener(e -> planUniversityTour());
+        planTourButton.addActionListener(_ -> planUniversityTour());
         planTourButton.setBackground(new java.awt.Color(156, 39, 176));
         planTourButton.setForeground(java.awt.Color.WHITE);
         planTourButton.setOpaque(true);
@@ -240,7 +236,7 @@ public class GraphApp extends JFrame {
         actionButtonsPanel.add(planTourButton);
 
         JButton showMatrixButton = new JButton("Show Cost Matrix");
-        showMatrixButton.addActionListener(e -> showCostMatrix());
+        showMatrixButton.addActionListener(_ -> showCostMatrix());
         showMatrixButton.setBackground(new java.awt.Color(103, 58, 183));
         showMatrixButton.setForeground(java.awt.Color.WHITE);
         showMatrixButton.setOpaque(true);
@@ -297,64 +293,26 @@ public class GraphApp extends JFrame {
     }
 
     private void setupListeners() {
-        startButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                startAlgorithm();
-            }
-        });
+        startButton.addActionListener(_ -> startAlgorithm());
 
-        pauseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                pauseAlgorithm();
-            }
-        });
+        pauseButton.addActionListener(_ -> pauseAlgorithm());
 
-        resetButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                resetAlgorithm();
-            }
-        });
+        resetButton.addActionListener(_ -> resetAlgorithm());
 
-        algorithmCombo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateNodeCombos();
-            }
-        });
+        algorithmCombo.addActionListener(_ -> updateNodeCombos());
 
-        speedSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            @Override
-            public void stateChanged(javax.swing.event.ChangeEvent e) {
-                if (animationTimer != null) {
-                    animationTimer.setDelay(speedSlider.getValue());
-                }
+        speedSlider.addChangeListener(_ -> {
+            if (animationTimer != null) {
+                animationTimer.setDelay(speedSlider.getValue());
             }
         });
 
         // Student management listeners
-        addStudentButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addNewStudent();
-            }
-        });
+        addStudentButton.addActionListener(_ -> addNewStudent());
 
-        viewReservationsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                viewAllReservations();
-            }
-        });
+        viewReservationsButton.addActionListener(_ -> viewAllReservations());
 
-        manageStudentsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                manageStudents();
-            }
-        });
+        manageStudentsButton.addActionListener(_ -> manageStudents());
 
         // Update reservation list when clicking on it
         reservationList.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -392,12 +350,10 @@ public class GraphApp extends JFrame {
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, 
                 int index, boolean isSelected, boolean cellHasFocus) {
-            if (value instanceof Node) {
-                Node node = (Node) value;
-                String displayName = node.getName().length() > 10 ? 
-                    node.getName().substring(0, 7) + "..." : 
+            if (value instanceof Node node) {
+                value = node.getName().length() > 10 ?
+                    node.getName().substring(0, 7) + "..." :
                     node.getName();
-                value = displayName;
             }
             return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         }
@@ -482,18 +438,15 @@ public class GraphApp extends JFrame {
         }
 
         final int[] stepCount = {0};
-        animationTimer = new javax.swing.Timer(speedSlider.getValue(), new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (graphPane.isAnimationComplete()) {
-                    graphPane.setHighlightedEdges(mstEdges);
-                    updateStatus("MST completed. Total cost: " + String.format("%.2f", totalCost) + " km");
-                    finishAnimation();
-                } else {
-                    stepCount[0]++;
-                    updateStatus("MST Step " + stepCount[0] + " - Adding edge to spanning tree...");
-                    graphPane.nextAnimationStep();
-                }
+        animationTimer = new javax.swing.Timer(speedSlider.getValue(), _ -> {
+            if (graphPane.isAnimationComplete()) {
+                graphPane.setHighlightedEdges(mstEdges);
+                updateStatus("MST completed. Total cost: " + String.format("%.2f", totalCost) + " km");
+                finishAnimation();
+            } else {
+                stepCount[0]++;
+                updateStatus("MST Step " + stepCount[0] + " - Adding edge to spanning tree...");
+                graphPane.nextAnimationStep();
             }
         });
 
