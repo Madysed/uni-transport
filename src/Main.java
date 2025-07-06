@@ -322,7 +322,7 @@ public class Main {
         if (universities.size() >= 3) {
             System.out.println("\n3. Traveling Salesman Problem (TSP):");
             Node startTSP = universities.getFirst();
-            TSP.TSPResult tspResult = TSP.solveTSPWithBitmasking(universities, startTSP);
+            TSP.TSPResult tspResult = TSP.solveTSPWithBitmasking(universities, startTSP, TSP.OptimizationType.COST);
             
             System.out.println("   TSP Tour starting from " + startTSP.getName() + ":");
             List<Node> tspPath = tspResult.getPath();

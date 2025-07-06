@@ -7,6 +7,12 @@ import java.util.*;
 
 public class TSP {
     
+    public enum OptimizationType {
+        COST,
+        TIME,
+        DISTANCE
+    }
+    
     public static class TSPResult {
         private final List<Node> path;
         private final double totalCost;
@@ -48,148 +54,173 @@ public class TSP {
     private static double[][] costMatrix;
     private static double[][] timeMatrix;
     private static List<Node> nodeList;
-
-    /**
-     * Solves the Traveling Salesman Problem (TSP) using Dynamic Programming with Bitmasking.
-     * Returns to the starting university after visiting all others with the minimum cost.
-     *
-     * @param universities List of university nodes to visit
-     * @param startUniversity The starting university node
-     * @return A TSPResult object containing the path, total cost, time, and route details
-     *
-     * @timeComplexity O(n^2 * 2^n) where n is the number of universities (limited to 10)
-     * @spaceComplexity O(n * 2^n) for the DP and parent arrays
-     */
-
-    public static TSPResult solveTSPWithBitmasking(List<Node> universities, Node startUniversity) {
-        if (universities.size() <= 1) {
-            return new TSPResult(universities, 0, 0);
+    
+    // TSP with Bitmasking and Dynamic Programming (simple and efficient)
+    public static TSPResult solveTSPWithBitmasking(List<Node> selectedUniversities, Node startUniversity, OptimizationType optimizationType) {
+        if (selectedUniversities.size() <= 1) {
+            return new TSPResult(selectedUniversities, 0, 0);
         }
         
-        // Limit to 10 universities to avoid complexity
-        if (universities.size() > 10) {
-            universities = universities.subList(0, 10);
-        }
-        
-        int n = universities.size();
-        nodeList = new ArrayList<>(universities);
-        
-        // Create cost and time matrices
-        createMatrices(nodeList);
-        
-        // Find starting university index
+        // Convert to list for indexing
+        List<Node> nodeList = new ArrayList<>(selectedUniversities);
         int startIndex = nodeList.indexOf(startUniversity);
         if (startIndex == -1) {
             startIndex = 0;
             startUniversity = nodeList.get(0);
         }
         
-        // If only one university
-        if (n == 1) {
-            return new TSPResult(Arrays.asList(startUniversity), 0, 0);
+        int n = nodeList.size();
+        double[][] costMatrix = new double[n][n];
+        double[][] timeMatrix = new double[n][n];
+        
+        // Initialize matrices
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                costMatrix[i][j] = Double.MAX_VALUE;
+                timeMatrix[i][j] = Double.MAX_VALUE;
+            }
+            costMatrix[i][i] = 0;
+            timeMatrix[i][i] = 0;
         }
         
-        // DP array: dp[mask][i] = minimum cost to reach i with visited universities in mask
-        double[][] dp = new double[1 << n][n];
-        int[][] parent = new int[1 << n][n];
-        
-        // Initialize values
-        for (int i = 0; i < (1 << n); i++) {
-            for (int j = 0; j < n; j++) {
-                dp[i][j] = Double.MAX_VALUE;
-                parent[i][j] = -1;
+        // Fill matrices with direct edges only
+        for (int i = 0; i < n; i++) {
+            Node from = nodeList.get(i);
+            for (Edge edge : from.getEdges()) {
+                int j = nodeList.indexOf(edge.getDestination());
+                if (j != -1) {
+                    costMatrix[i][j] = edge.getCost();
+                    timeMatrix[i][j] = edge.getTravelTime();
+                }
             }
         }
         
-        // Start from initial university
+        // DP state: dp[mask][last] = minimum cost ending at 'last' visiting all in mask
+        double[][] dp = new double[1 << n][n];
+        int[][] parent = new int[1 << n][n];
+        
+        // Initialize
+        for (int i = 0; i < (1 << n); i++) {
+            Arrays.fill(dp[i], Double.MAX_VALUE);
+            Arrays.fill(parent[i], -1);
+        }
+        
+        // Start from first university
         dp[1 << startIndex][startIndex] = 0;
         
         // Fill DP table
         for (int mask = 0; mask < (1 << n); mask++) {
-            for (int u = 0; u < n; u++) {
-                // If u is not in mask or cost is infinite, continue
-                if ((mask & (1 << u)) == 0 || dp[mask][u] == Double.MAX_VALUE) {
-                    continue;
-                }
+            for (int last = 0; last < n; last++) {
+                if ((mask & (1 << last)) == 0 || dp[mask][last] == Double.MAX_VALUE) continue;
                 
-                // Check all remaining universities
-                for (int v = 0; v < n; v++) {
-                    // If v is already visited, continue
-                    if ((mask & (1 << v)) != 0) {
-                        continue;
-                    }
+                for (int next = 0; next < n; next++) {
+                    if ((mask & (1 << next)) != 0) continue;
                     
-                    int newMask = mask | (1 << v);
-                    double newCost = dp[mask][u] + costMatrix[u][v];
+                    double cost = optimizationType == OptimizationType.TIME ? 
+                                timeMatrix[last][next] : costMatrix[last][next];
                     
-                    if (newCost < dp[newMask][v]) {
-                        dp[newMask][v] = newCost;
-                        parent[newMask][v] = u;
+                    if (cost != Double.MAX_VALUE) {
+                        int nextMask = mask | (1 << next);
+                        double newCost = dp[mask][last] + cost;
+                        
+                        if (newCost < dp[nextMask][next]) {
+                            dp[nextMask][next] = newCost;
+                            parent[nextMask][next] = last;
+                        }
                     }
                 }
             }
         }
         
-        // Find best solution (return to starting point)
+        // Find best tour that returns to start
         double minTotalCost = Double.MAX_VALUE;
-        int bestLastNode = -1;
-        int allVisited = (1 << n) - 1; // All universities visited
+        int bestLast = -1;
+        int allVisited = (1 << n) - 1;
         
-        for (int i = 0; i < n; i++) {
-            if (i == startIndex) continue;
+        for (int last = 0; last < n; last++) {
+            if (last == startIndex) continue;
             
-            double totalCost = dp[allVisited][i] + costMatrix[i][startIndex];
-            if (totalCost < minTotalCost) {
-                minTotalCost = totalCost;
-                bestLastNode = i;
+            double returnCost = optimizationType == OptimizationType.TIME ? 
+                              timeMatrix[last][startIndex] : costMatrix[last][startIndex];
+            
+            if (returnCost != Double.MAX_VALUE && dp[allVisited][last] != Double.MAX_VALUE) {
+                double totalCost = dp[allVisited][last] + returnCost;
+                if (totalCost < minTotalCost) {
+                    minTotalCost = totalCost;
+                    bestLast = last;
+                }
             }
         }
         
-        // Build final path
+        // Reconstruct path
         List<Node> path = new ArrayList<>();
+        double totalCost = 0;
         double totalTime = 0;
         
-        if (bestLastNode != -1) {
-            // Reconstruct path
-            List<Integer> indices = new ArrayList<>();
+        if (bestLast != -1) {
+            // Get the sequence of cities
+            List<Integer> sequence = new ArrayList<>();
             int currentMask = allVisited;
-            int currentNode = bestLastNode;
+            int currentLast = bestLast;
             
-            while (currentNode != -1) {
-                indices.add(currentNode);
-                int nextNode = parent[currentMask][currentNode];
-                currentMask ^= (1 << currentNode);
-                currentNode = nextNode;
+            while (currentLast != -1) {
+                sequence.add(currentLast);
+                int nextLast = parent[currentMask][currentLast];
+                currentMask ^= (1 << currentLast);
+                currentLast = nextLast;
             }
+            Collections.reverse(sequence);
+            sequence.add(startIndex); // Return to start
             
-            Collections.reverse(indices);
-            
-            // Convert indices to nodes
-            for (int index : indices) {
-                path.add(nodeList.get(index));
-            }
-            path.add(startUniversity); // Return to starting point
-            
-            // Calculate total time
-            for (int i = 0; i < path.size() - 1; i++) {
-                int from = nodeList.indexOf(path.get(i));
-                int to = nodeList.indexOf(path.get(i + 1));
-                totalTime += timeMatrix[from][to];
+            // Build path and calculate costs
+            for (int i = 0; i < sequence.size(); i++) {
+                Node current = nodeList.get(sequence.get(i));
+                path.add(current);
+                
+                if (i < sequence.size() - 1) {
+                    Node next = nodeList.get(sequence.get(i + 1));
+                    Edge edge = findDirectEdge(current, next);
+                    if (edge != null) {
+                        totalCost += edge.getCost();
+                        totalTime += edge.getTravelTime();
+                    }
+                }
             }
         }
         
-        TSPResult result = new TSPResult(path, minTotalCost, totalTime);
+        // Create result
+        TSPResult result = new TSPResult(path, totalCost, totalTime);
         result.setVisitedOrder(new ArrayList<>(path));
         
         // Create details
-        String details = String.format("TSP Solution using Dynamic Programming with Bitmasking\n");
-        details += String.format("Universities visited: %d\n", n);
-        details += String.format("Total cost: %.0f T\n", minTotalCost);
-        details += String.format("Total time: %.1f hours\n", totalTime);
-        details += String.format("Route: %s", result.getRouteDescription());
-        result.setDetails(details);
+        StringBuilder details = new StringBuilder();
+        details.append("Smart TSP Solution Details:\n");
+        details.append(String.format("Universities visited: %d\n", selectedUniversities.size()));
+        details.append(String.format("Total path length: %d nodes\n", path.size()));
+        details.append(String.format("Total cost: %.0f T\n", totalCost));
+        details.append(String.format("Total time: %.1f hours\n", totalTime));
+        details.append("\nPath: ");
+        for (Node node : path) {
+            details.append(node.getName()).append(" -> ");
+        }
+        details.setLength(details.length() - 4); // Remove last arrow
+        result.setDetails(details.toString());
         
         return result;
+    }
+    
+    // Helper method to reconstruct path between two nodes
+    private static List<Node> reconstructPath(List<Node> nodeList, int from, int to, int[][] nextNode) {
+        List<Node> path = new ArrayList<>();
+        path.add(nodeList.get(from));
+        
+        while (from != to) {
+            from = nextNode[from][to];
+            if (from == -1) break;
+            path.add(nodeList.get(from));
+        }
+        
+        return path;
     }
     
     // Create cost and time matrices
@@ -198,22 +229,41 @@ public class TSP {
         costMatrix = new double[n][n];
         timeMatrix = new double[n][n];
         
+        // Initialize matrices with infinity
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (i == j) {
                     costMatrix[i][j] = 0;
                     timeMatrix[i][j] = 0;
                 } else {
-                    // Search for direct edge
-                    Edge directEdge = findDirectEdge(nodes.get(i), nodes.get(j));
-                    if (directEdge != null) {
-                        costMatrix[i][j] = directEdge.getCost();
-                        timeMatrix[i][j] = directEdge.getTravelTime();
-                    } else {
-                        // Calculate based on direct distance
-                        double distance = calculateDistance(nodes.get(i), nodes.get(j));
-                        costMatrix[i][j] = distance * 150; // Assumption: 150 Toman per kilometer
-                        timeMatrix[i][j] = distance / 60.0; // Assumption: average speed 60 km/h
+                    costMatrix[i][j] = Double.MAX_VALUE;
+                    timeMatrix[i][j] = Double.MAX_VALUE;
+                }
+            }
+        }
+        
+        // Fill matrices only with existing edges
+        for (int i = 0; i < n; i++) {
+            Node from = nodes.get(i);
+            for (Edge edge : from.getEdges()) {
+                int j = nodes.indexOf(edge.getDestination());
+                if (j != -1) {
+                    costMatrix[i][j] = edge.getCost();
+                    timeMatrix[i][j] = edge.getTravelTime();
+                }
+            }
+        }
+        
+        // Run Floyd-Warshall to find shortest paths between all pairs
+        for (int k = 0; k < n; k++) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (costMatrix[i][k] != Double.MAX_VALUE && costMatrix[k][j] != Double.MAX_VALUE) {
+                        double newCost = costMatrix[i][k] + costMatrix[k][j];
+                        if (newCost < costMatrix[i][j]) {
+                            costMatrix[i][j] = newCost;
+                            timeMatrix[i][j] = timeMatrix[i][k] + timeMatrix[k][j];
+                        }
                     }
                 }
             }
@@ -236,20 +286,8 @@ public class TSP {
         double dy = a.getY() - b.getY();
         return Math.sqrt(dx * dx + dy * dy);
     }
-
-    /**
-     * Solves the Traveling Salesman Problem (TSP) using the Nearest Neighbor heuristic.
-     * Starts at the given university and iteratively visits the nearest unvisited node,
-     * then returns to the starting point.
-     *
-     * @param universities List of university nodes to visit
-     * @param startUniversity The starting university node
-     * @return A TSPResult object containing the path, total cost, time, and route details
-     *
-     * @timeComplexity O(n^2) where n is the number of universities
-     * @spaceComplexity O(n) for the visited set and path list
-     */
-
+    
+    // Simple TSP with Nearest Neighbor (for comparison)
     public static TSPResult solveTSPSimple(List<Node> universities, Node startUniversity) {
         if (universities.size() <= 1) {
             return new TSPResult(universities, 0, 0);
@@ -350,5 +388,10 @@ public class TSP {
         }
         
         return sb.toString();
+    }
+
+    public static TSPResult solveTSP(List<Node> universities, Node startUniversity, OptimizationType optimizationType) {
+        // For now, we'll use the simple TSP implementation
+        return solveTSPSimple(universities, startUniversity);
     }
 } 

@@ -96,7 +96,8 @@ public class GraphApp extends JFrame {
         algorithmCombo = new JComboBox<>(new String[]{
             "(MST)",
             "(Dijkstra)",
-            "(TSP)",
+            "(TSP-Cost)",
+            "(TSP-Time)",
             "(MST+SD2)",
         });
 
@@ -387,8 +388,12 @@ public class GraphApp extends JFrame {
             }
             runDijkstraAlgorithm(startNode, endNode);
         } else if (selectedAlgorithm.contains("TSP")) {
-            runTSPAlgorithm(startNode);
-        }else if (selectedAlgorithm.contains("(MST+SD2)")) {
+            if (selectedAlgorithm.contains("Cost")) {
+                runTSPAlgorithm(startNode, TSP.OptimizationType.COST);
+            } else if (selectedAlgorithm.contains("Time")) {
+                runTSPAlgorithm(startNode, TSP.OptimizationType.TIME);
+            }
+        } else if (selectedAlgorithm.contains("(MST+SD2)")) {
             runMSTandSD2Algorithm();
         }
     }
@@ -558,11 +563,12 @@ public class GraphApp extends JFrame {
         }
     }
 
-    private void runTSPAlgorithm(Node start) {
-        updateStatus("Running Traveling Salesman Problem algorithm...");
+    private void runTSPAlgorithm(Node start, TSP.OptimizationType optimizationType) {
+        String optType = optimizationType == TSP.OptimizationType.TIME ? "time" : "cost";
+        updateStatus("Running TSP algorithm (optimizing for " + optType + ")...");
 
         // Use advanced TSP with optimal method selection
-        TSP.TSPResult result = TSP.solveTSPWithBitmasking(graphPane.getNodes(), start);
+        TSP.TSPResult result = TSP.solveTSPWithBitmasking(graphPane.getNodes(), start, optimizationType);
         List<Node> visitOrder = result.getVisitedOrder();
         double totalCost = result.getTotalCost();
         double totalTime = result.getTotalTime();
@@ -575,7 +581,7 @@ public class GraphApp extends JFrame {
         if (!visitOrder.isEmpty()) {
             // Start step-by-step animation
             graphPane.startAnimation(new ArrayList<>(), visitOrder, "TSP");
-            updateStatus("Starting TSP animation - finding optimal tour from " + start.getName() + "...");
+            updateStatus("Starting TSP animation - finding optimal " + optType + "-based tour from " + start.getName() + "...");
 
             // Set timer for animation
             if (animationTimer != null) {
@@ -591,7 +597,7 @@ public class GraphApp extends JFrame {
                     if (stepCount[0] >= visitOrder.size()) {
                         graphPane.setHighlightedPath(visitOrder);
                         updateStatus("TSP tour completed: " + getPathString(visitOrder) +
-                                    " (Total cost: " + String.format("%.2f", finalCost) + " km, " +
+                                    " (Total " + optType + ": " + String.format("%.2f", finalCost) + " " + optType + ", " +
                                     "Total time: " + String.format("%.2f", finalTime) + " hours)");
                         finishAnimation();
                     } else {
@@ -805,7 +811,7 @@ public class GraphApp extends JFrame {
                 } else if (selectedAlgorithm.contains("Dijkstra") && endNode != null) {
                     runDijkstraAlgorithm(startNode, endNode);
                 } else if (selectedAlgorithm.contains("TSP")) {
-                    runTSPAlgorithm(startNode);
+                    runTSPAlgorithm(startNode, TSP.OptimizationType.COST);
                 }
 
                 updateStatus("Algorithm restarted with new route data...");
@@ -850,7 +856,7 @@ public class GraphApp extends JFrame {
                                 " (Distance: " + String.format("%.2f", endNode.getDistance()) + " km)");
                 }
             } else if (selectedAlgorithm.contains("TSP")) {
-                TSP.TSPResult result = TSP.solveTSPWithBitmasking(graphPane.getNodes(), startNode);
+                TSP.TSPResult result = TSP.solveTSPWithBitmasking(graphPane.getNodes(), startNode, TSP.OptimizationType.COST);
                 if (!result.getPath().isEmpty()) {
                     graphPane.setHighlightedPath(result.getPath());
                     updateStatus("TSP tour updated: " + getPathString(result.getPath()) +
@@ -1419,7 +1425,12 @@ public class GraphApp extends JFrame {
             .findFirst().orElse(selectedUniversities.get(0));
 
         // Select algorithm type
-        String[] algorithms = {"Smart TSP (Bitmasking)", "Simple TSP (Nearest Neighbor)"};
+        String[] algorithms = {
+            "Smart TSP (Cost Optimization)",
+            "Smart TSP (Time Optimization)",
+            "Simple TSP (Cost Optimization)",
+            "Simple TSP (Time Optimization)"
+        };
         String algorithm = (String) JOptionPane.showInputDialog(this,
             "Choose TSP algorithm:", "Algorithm Selection",
             JOptionPane.QUESTION_MESSAGE, null, algorithms, algorithms[0]);
@@ -1429,9 +1440,17 @@ public class GraphApp extends JFrame {
         // Solve TSP problem
         TSP.TSPResult result;
         if (algorithm.contains("Smart")) {
-            result = TSP.solveTSPWithBitmasking(selectedUniversities, startUni);
+            if (algorithm.contains("Time")) {
+                result = TSP.solveTSPWithBitmasking(selectedUniversities, startUni, TSP.OptimizationType.TIME);
+            } else {
+                result = TSP.solveTSPWithBitmasking(selectedUniversities, startUni, TSP.OptimizationType.COST);
+            }
         } else {
-            result = TSP.solveTSPSimple(selectedUniversities, startUni);
+            if (algorithm.contains("Time")) {
+                result = TSP.solveTSP(selectedUniversities, startUni, TSP.OptimizationType.TIME);
+            } else {
+                result = TSP.solveTSP(selectedUniversities, startUni, TSP.OptimizationType.COST);
+            }
         }
 
         // Display results
