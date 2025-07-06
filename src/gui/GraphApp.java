@@ -67,11 +67,6 @@ public class GraphApp extends JFrame {
         });
     }
 
-    // Static method for console access
-    public static GraphApp getInstance() {
-        return instance;
-    }
-
     // Method for updating graph from console
     public static void updateFromConsole(List<Node> nodes) {
         if (instance != null) {
@@ -82,23 +77,13 @@ public class GraphApp extends JFrame {
     }
 
     private void updateGraphFromConsole(List<Node> nodes) {
-        // Clear current graph
         graphPane.clearNodes();
-
-        // Add new nodes
         for (Node node : nodes) {
             graphPane.addNodeDirectly(node);
         }
-
-        // Rearrange nodes
         graphPane.arrangeNodes();
-
-        // Update combo boxes
         updateNodeCombos();
-
-        // Update reservation list
         updateReservationList();
-
         updateStatus("Graph updated from console - " + nodes.size() + " universities loaded");
     }
 
@@ -113,10 +98,10 @@ public class GraphApp extends JFrame {
         statusArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
         algorithmCombo = new JComboBox<>(new String[]{
-            "Minimum Spanning Tree (MST)",
-            "Shortest Path (Dijkstra)",
-            "Traveling Salesman Problem (TSP)",
-                "MST with SD2",
+            "(MST)",
+            "(Dijkstra)",
+            "(TSP)",
+                "(MST+SD2)",
         });
 
         startNodeCombo = new JComboBox<>();
@@ -130,7 +115,7 @@ public class GraphApp extends JFrame {
         speedSlider.setPaintTicks(true);
         speedSlider.setPaintLabels(true);
 
-        // Speed labels
+         //Speed labels
         Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
         labelTable.put(100, new JLabel("Fast"));
         labelTable.put(600, new JLabel("Medium"));
@@ -390,7 +375,7 @@ public class GraphApp extends JFrame {
         startNodeCombo.removeAllItems();
         endNodeCombo.removeAllItems();
         for (Node node : graphPane.getNodes()) {
-            String displayName = node.getName().length() > 17 ? node.getName().substring(0, 14) + "..." : node.getName();
+            String displayName = node.getName().length() > 10 ? node.getName().substring(0,7) + "..." : node.getName();
             startNodeCombo.addItem(displayName);
             endNodeCombo.addItem(displayName);
         }
@@ -437,7 +422,6 @@ public class GraphApp extends JFrame {
     private void runMSTAlgorithm() {
         updateStatus("Running Minimum Spanning Tree algorithm...");
         List<Edge> mstEdges = Kruskal.findMST(graphPane.getNodes());
-        List<Edge> sD2Edges = SD2.findSD2Edges(mstEdges, graphPane.getNodes());
         double totalCost = Kruskal.calculateMSTCost(mstEdges);
 
         // Start step-by-step animation
@@ -467,7 +451,7 @@ public class GraphApp extends JFrame {
 
         animationTimer.start();
     }
-    private void runMSTsndSD2Algorithm() {
+    private void runMSTandSD2Algorithm() {
         updateStatus("Running Minimum Spanning Tree algorithm with SD2...");
         List<Edge> mstEdges = Kruskal.findMST(graphPane.getNodes());
         List<Edge> sD2Edges = SD2.findSD2Edges(mstEdges, graphPane.getNodes());
