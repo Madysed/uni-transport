@@ -43,20 +43,24 @@ public class EdgeUtils {
 
     public static List<Edge> getAllOriginalEdges(List<Node> nodes) {
         List<Edge> allEdges = new ArrayList<>();
-        Set<String> addedEdges = new HashSet<>();
-
+        Set<String> seenEdges = new HashSet<>();
         for (Node node : nodes) {
             for (Edge edge : node.getEdges()) {
-                // Create unique key for edge (direction independent)
-                String edgeKey = createEdgeKey(edge.getSource(), edge.getDestination());
-                if (!addedEdges.contains(edgeKey)) {
+                String edgeKey = getEdgeKey(edge.getSource(), edge.getDestination());
+                if (!seenEdges.contains(edgeKey)) {
                     allEdges.add(edge);
-                    addedEdges.add(edgeKey);
+                    seenEdges.add(edgeKey);
                 }
             }
         }
-
         return allEdges;
+    }
+
+    // Helper method to create a unique key for bidirectional edges
+    private static String getEdgeKey(Node source, Node dest) {
+        String key1 = source.getName() + "->" + dest.getName();
+        String key2 = dest.getName() + "->" + source.getName();
+        return key1.compareTo(key2) < 0 ? key1 : key2;
     }
 
     public static boolean isEdgeInList(List<Edge> edgeList, Edge edge) {

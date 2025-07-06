@@ -24,6 +24,10 @@ public class SD2 {
 
         // Find all original edges for potential additions
         List<Edge> allOriginalEdges = getAllOriginalEdges(originalNodes);
+        System.out.println("All original edges: " + allOriginalEdges.size());
+        for (Edge edge : allOriginalEdges) {
+            System.out.println("Edge: " + edge.getSource().getName() + " -> " + edge.getDestination().getName() + " (Weight: " + edge.getWeight() + ")");
+        }
 
         // Find nodes that violate diameter-2 property
         Map<Node, List<Node>> violatingNodes = satisfiesDiameter2(originalNodes, mstGraph);

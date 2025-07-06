@@ -21,7 +21,7 @@ public class GraphPane extends JPanel {
     private List<Node> animationNodes;
     private int animationStep;
     private boolean showAnimation;
-    private String animationType = ""; // "MST", "DIJKSTRA", "TSP"
+    private String animationType = ""; // "MST", "DIJKSTRA", "TSP", "MSTSD2"
     private final java.util.Map<Node, String> nodeLabels = new java.util.HashMap<>();
     
     // Zoom and pan variables
@@ -285,7 +285,7 @@ public class GraphPane extends JPanel {
     public boolean isAnimationComplete() {
         if (!showAnimation) return true;
         
-        if ("MST".equals(animationType)) {
+        if ("MST".equals(animationType) || "MSTSD2".equals(animationType)) {
             return animationStep >= animationEdges.size();
         } else if ("DIJKSTRA".equals(animationType) || "TSP".equals(animationType)) {
             return animationStep >= animationNodes.size();
@@ -354,74 +354,70 @@ public class GraphPane extends JPanel {
         
         g2d.dispose();
     }
-    
+
     private void drawEdges(Graphics2D g2d) {
         Set<String> drawnEdges = new HashSet<>();
-        
+
         for (Node node : nodes) {
             for (Edge edge : node.getEdges()) {
                 String edgeKey = getEdgeKey(edge.getSource(), edge.getDestination());
                 if (drawnEdges.contains(edgeKey)) continue;
                 drawnEdges.add(edgeKey);
-                
-                // تعیین رنگ و ضخامت یال
-                if (showAnimation && "MST".equals(animationType) && animationEdges.contains(edge)) {
-                                    // MST animation
-                int edgeIndex = animationEdges.indexOf(edge);
-                if (edgeIndex < animationStep) {
-                    g2d.setColor(VISITED_COLOR); // Green for visited
-                    g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                } else if (edgeIndex == animationStep) {
-                    g2d.setColor(ANIMATION_COLOR); // Orange for being examined
-                    g2d.setStroke(new BasicStroke(4, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                } else {
-                    g2d.setColor(new java.awt.Color(200, 200, 200)); // Gray for not yet examined
-                    g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                }
-                            } else if (showAnimation && ("DIJKSTRA".equals(animationType) || "TSP".equals(animationType))) {
-                // Dijkstra or TSP animation - show edges that are in path
-                boolean isInPath = false;
-                if (animationNodes.size() > 1) {
-                    for (int i = 0; i < Math.min(animationStep, animationNodes.size() - 1); i++) {
-                        Node source = animationNodes.get(i);
-                        Node dest = animationNodes.get(i + 1);
-                        if ((edge.getSource().equals(source) && edge.getDestination().equals(dest)) ||
-                            (edge.getSource().equals(dest) && edge.getDestination().equals(source))) {
-                            isInPath = true;
-                            break;
+
+                // Determine edge color and thickness
+                if (showAnimation && ("MST".equals(animationType) || "MSTSD2".equals(animationType)) && animationEdges.contains(edge)) {
+                    // MST or MSTSD2 animation
+                    int edgeIndex = animationEdges.indexOf(edge);
+                    if (edgeIndex < animationStep) {
+                        g2d.setColor(VISITED_COLOR); // Green for visited
+                        g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                    } else if (edgeIndex == animationStep) {
+                        g2d.setColor(ANIMATION_COLOR); // Orange for being examined
+                        g2d.setStroke(new BasicStroke(4, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                    } else {
+                        g2d.setColor(new java.awt.Color(200, 200, 200)); // Gray for not yet examined
+                        g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                    }
+                } else if (showAnimation && ("DIJKSTRA".equals(animationType) || "TSP".equals(animationType))) {
+                    // Existing Dijkstra/TSP logic remains unchanged
+                    boolean isInPath = false;
+                    if (animationNodes.size() > 1) {
+                        for (int i = 0; i < Math.min(animationStep, animationNodes.size() - 1); i++) {
+                            Node source = animationNodes.get(i);
+                            Node dest = animationNodes.get(i + 1);
+                            if ((edge.getSource().equals(source) && edge.getDestination().equals(dest)) ||
+                                    (edge.getSource().equals(dest) && edge.getDestination().equals(source))) {
+                                isInPath = true;
+                                break;
+                            }
                         }
                     }
-                }
-                
-                if (isInPath) {
-                    g2d.setColor(VISITED_COLOR); // Green for path edges
-                    g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                } else {
-                    g2d.setColor(EDGE_COLOR);
-                    g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                }
+                    if (isInPath) {
+                        g2d.setColor(VISITED_COLOR); // Green for path edges
+                        g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                    } else {
+                        g2d.setColor(EDGE_COLOR);
+                        g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                    }
                 } else if (highlightedEdges.contains(edge)) {
                     g2d.setColor(HIGHLIGHTED_EDGE_COLOR);
                     g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                }else if (highlightedEdgesYellow.contains(edge)) {
+                } else if (highlightedEdgesYellow.contains(edge)) {
                     g2d.setColor(HIGHLIGHTED_EDGE_COLOR_YELLOW);
                     g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                 } else {
                     g2d.setColor(EDGE_COLOR);
                     g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                 }
-                
+
                 // Draw line with zoom and offset calculation
                 int x1 = (int) ((edge.getSource().getX() + offsetX) * zoomFactor);
                 int y1 = (int) ((edge.getSource().getY() + offsetY) * zoomFactor);
                 int x2 = (int) ((edge.getDestination().getX() + offsetX) * zoomFactor);
                 int y2 = (int) ((edge.getDestination().getY() + offsetY) * zoomFactor);
-                
+
                 g2d.drawLine(x1, y1, x2, y2);
-                
-                // Remove directional arrow - undirected graph
-                // drawDirectionalArrow(g2d, x1, y1, x2, y2);
-                
+
                 // Draw edge information
                 drawEdgeInfo(g2d, edge, x1, y1, x2, y2);
             }
@@ -891,7 +887,7 @@ public class GraphPane extends JPanel {
                     }
                 }
             }
-            
+
             // Calculate starting position for text
             int totalHeight = lines.length * fm.getHeight();
             int startY = y - totalHeight / 2 + fm.getAscent();

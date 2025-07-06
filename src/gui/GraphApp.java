@@ -376,7 +376,8 @@ public class GraphApp extends JFrame {
         startButton.setEnabled(false);
         pauseButton.setEnabled(true);
 
-        if (selectedAlgorithm.contains("MST")) {
+        assert selectedAlgorithm != null;
+        if (selectedAlgorithm.equals("(MST)")) {
             runMSTAlgorithm();
         } else if (selectedAlgorithm.contains("Dijkstra")) {
             if (endNode == null) {
@@ -387,6 +388,8 @@ public class GraphApp extends JFrame {
             runDijkstraAlgorithm(startNode, endNode);
         } else if (selectedAlgorithm.contains("TSP")) {
             runTSPAlgorithm(startNode);
+        }else if (selectedAlgorithm.contains("(MST+SD2)")) {
+            runMSTandSD2Algorithm();
         }
     }
 
@@ -423,30 +426,41 @@ public class GraphApp extends JFrame {
         animationTimer.start();
     }
     private void runMSTandSD2Algorithm() {
-        updateStatus("Running Minimum Spanning Tree algorithm with SD2...");
+        updateStatus("Running Minimum Spanning Tree with SD2 algorithm...");
         List<Edge> mstEdges = Kruskal.findMST(graphPane.getNodes());
-        List<Edge> sD2Edges = SD2.findSD2Edges(mstEdges, graphPane.getNodes());
+        List<Edge> sd2Edges = SD2.findSD2Edges(mstEdges, graphPane.getNodes());
+        System.out.print("SD2 size "+sd2Edges.size());
+        updateStatus("SD2 size "+sd2Edges.size());
         double totalCost = Kruskal.calculateMSTCost(mstEdges);
 
-        // Start step-by-step animation
-        graphPane.startAnimation(mstEdges, new ArrayList<>(), "MST");
+        // Start step-by-step animation for MST
+        graphPane.startAnimation(mstEdges, new ArrayList<>(), "MSTSD2");
         updateStatus("Starting MST animation - watching edges being added...");
 
-        // Set timer for animation
+        // Stop any existing animation
         if (animationTimer != null) {
             animationTimer.stop();
         }
 
         final int[] stepCount = {0};
-        animationTimer = new javax.swing.Timer(speedSlider.getValue(), _ -> {
-            if (graphPane.isAnimationComplete()) {
-                graphPane.setHighlightedEdges(mstEdges);
-                updateStatus("MST completed. Total cost: " + String.format("%.2f", totalCost) + " km");
-                finishAnimation();
-            } else {
-                stepCount[0]++;
-                updateStatus("MST Step " + stepCount[0] + " - Adding edge to spanning tree...");
-                graphPane.nextAnimationStep();
+        animationTimer = new javax.swing.Timer(speedSlider.getValue(), new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!graphPane.isAnimationComplete()) {
+                    stepCount[0]++;
+                    updateStatus("MST Step " + stepCount[0] + " - Adding edge to spanning tree...");
+                    graphPane.nextAnimationStep();
+                } else if (stepCount[0] == mstEdges.size()) {
+                    // MST animation complete, highlight SD2 edges
+                    graphPane.setHighlightedEdges(mstEdges);
+                    graphPane.setHighlightedEdgesYellow(sd2Edges);
+                    updateStatus("MST completed. Highlighting SD2 edges...");
+                    stepCount[0]++;
+                } else {
+                    // SD2 edges are now highlighted, complete the animation
+                    updateStatus("MST+SD2 completed. MST cost: " + String.format("%.2f", totalCost) + " km");
+                    finishAnimation();
+                }
             }
         });
 
