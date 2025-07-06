@@ -30,45 +30,6 @@ public class Bfs {
         return dist;
     }
     
-    public static List<Node> breadthFirstSearch(List<Node> nodes, Node start, Node target) {
-        if (start == null || target == null) return new ArrayList<>();
-        
-        Queue<Node> queue = new LinkedList<>();
-        Set<Node> visited = new HashSet<>();
-        Map<Node, Node> parent = new HashMap<>();
-        
-        queue.offer(start);
-        visited.add(start);
-        parent.put(start, null);
-        
-        while (!queue.isEmpty()) {
-            Node current = queue.poll();
-            
-            if (current.equals(target)) {
-                // Path reconstruction
-                List<Node> path = new ArrayList<>();
-                Node node = target;
-                while (node != null) {
-                    path.add(0, node);
-                    node = parent.get(node);
-                }
-                return path;
-            }
-            
-            // Check neighbors
-            for (Edge edge : current.getEdges()) {
-                Node neighbor = edge.getDestination();
-                if (!visited.contains(neighbor)) {
-                    visited.add(neighbor);
-                    parent.put(neighbor, current);
-                    queue.offer(neighbor);
-                }
-            }
-        }
-        
-        return new ArrayList<>(); // Path not found
-    }
-    
     public static boolean isConnected(List<Node> nodes) {
         if (nodes.isEmpty()) return true;
         
