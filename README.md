@@ -1,5 +1,7 @@
 # University Transport System (Graph Algorithms + Booking + Visualizer)
 
+<img width="2558" height="1334" alt="Screenshot 2026-02-23 094033" src="https://github.com/user-attachments/assets/9fd4fc28-b555-4e80-ae40-bf91350c9a90" />
+
 A Java-based university transportation simulator that models universities as nodes and routes as weighted edges, then applies classic graph algorithms to analyze and optimize travel. The project includes both a console interface for managing data and a Swing GUI visualizer for interactive exploration, algorithm animation, and reservation management.
 
 ---
@@ -114,3 +116,4 @@ This project demonstrates:
 - Java Swing GUI development
 - File I/O handling
 - Basic booking/reservation system design
+
